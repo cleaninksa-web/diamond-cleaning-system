@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Diamond Cleaning - نظام إدارة التنظيف الماسي</title>
+  <meta name="description" content="نظام إدارة مؤسسة التنظيف الماسي للصيانة والنظافة - جدة">
+  <link rel="stylesheet" href="css/styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+</head>
+<body>
+
+<!-- ===== SPLASH SCREEN ===== -->
+<div id="splash-screen">
+  <div class="bubble"></div><div class="bubble"></div><div class="bubble"></div>
+  <div class="bubble"></div><div class="bubble"></div>
+  <div class="splash-logo-wrapper">
+    <img src="assets/logo.png" alt="التنظيف الماسي" class="splash-logo-img">
+  </div>
+  <div class="splash-progress"><div class="splash-progress-bar"></div></div>
+  <button class="splash-skip" onclick="closeSplash()">تخطي ←</button>
+</div>
+
+<!-- ===== TOAST CONTAINER ===== -->
+<div id="toast-container" class="toast-container"></div>
+
+<!-- ===== WELCOME MODAL ===== -->
+<div id="welcome-modal" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 class="modal-title">👋 مرحباً بك!</h3>
+      <button class="modal-close" onclick="closeWelcomeModal()">&times;</button>
+    </div>
+    <div class="modal-body welcome-content">
+      <h2>أهلاً عبدالله محمد</h2>
+      <p class="greeting">مرحباً بك في نظام إدارة التنظيف الماسي</p>
+      <div class="welcome-stats">
+        <div class="welcome-stat"><div class="val" id="w-total">232</div><div class="lbl">إجمالي العملاء</div></div>
+        <div class="welcome-stat"><div class="val" id="w-active">175</div><div class="lbl">عملاء نشطين</div></div>
+        <div class="welcome-stat"><div class="val" id="w-techs">4</div><div class="lbl">فنيين</div></div>
+        <div class="welcome-stat"><div class="val" id="w-revenue">215,682</div><div class="lbl">إجمالي التحصيلات</div></div>
+      </div>
+      <button class="btn btn-primary btn-lg" onclick="closeWelcomeModal()">ابدأ الآن 🚀</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SIDEBAR OVERLAY (mobile) ===== -->
+<div class="sidebar-overlay"></div>
+
+<!-- ===== APP WRAPPER ===== -->
+<div class="app-wrapper">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <img src="assets/logo.png" alt="التنظيف الماسي">
+    </div>
+    <nav class="sidebar-nav">
+      <a class="nav-item active" data-route="dashboard"><span class="icon">📊</span>لوحة التحكم</a>
+      <a class="nav-item" data-route="customers"><span class="icon">👥</span>العملاء</a>
+      <a class="nav-item" data-route="technicians"><span class="icon">🔧</span>الفنيون</a>
+      <div class="nav-divider"></div>
+      <a class="nav-item" data-route="payments"><span class="icon">💰</span>التحصيلات</a>
+      <a class="nav-item" data-route="contracts"><span class="icon">📝</span>العقود</a>
+      <a class="nav-item" data-route="visits"><span class="icon">📅</span>الزيارات</a>
+      <div class="nav-divider"></div>
+      <a class="nav-item" data-route="accounting"><span class="icon">🏦</span>المحاسبة</a>
+      <a class="nav-item" data-route="documents"><span class="icon">📄</span>المستندات</a>
+      <a class="nav-item" data-route="reports"><span class="icon">📈</span>التقارير</a>
+      <a class="nav-item" data-route="data-quality"><span class="icon">✅</span>جودة البيانات</a>
+      <a class="nav-item" data-route="notifications"><span class="icon">🔔</span>التنبيهات<span id="nav-notif-badge" class="nav-badge" style="display:none">0</span></a>
+      <div class="nav-divider"></div>
+      <a class="nav-item" data-route="settings"><span class="icon">⚙️</span>الإعدادات</a>
+    </nav>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-right">
+        <button class="hamburger" id="hamburger">☰</button>
+        <h1 class="page-title" id="page-title">لوحة التحكم</h1>
+      </div>
+      <div class="header-left">
+        <div class="header-search">
+          <input type="text" id="global-search" placeholder="بحث بالاسم أو الكود أو الجوال...">
+          <span class="search-icon">🔍</span>
+        </div>
+        <!-- Smart Bell -->
+        <div class="notif-bell-wrapper">
+          <button class="notif-btn" onclick="toggleNotifDropdown()">
+            🔔<span class="notif-badge" id="notif-badge" style="display:none">0</span>
+          </button>
+          <div class="notif-dropdown" id="notif-dropdown">
+            <div class="notif-empty"><div style="font-size:2rem">🔔</div><div>جاري التحميل...</div></div>
+          </div>
+        </div>
+        <!-- Connection Status -->
+        <span id="connection-status" title="جاري الاتصال..." style="font-size:1.1rem;cursor:default">⏳</span>
+      </div>
+    </header>
+
+    <!-- Page Content -->
+    <div class="page-content">
+
+      <!-- Overdue Banner -->
+      <div id="overdue-banner" class="overdue-banner" style="display:none"></div>
+
+      <!-- Accounting -->
+      <section id="section-accounting" class="page-section" style="position:relative"></section>
+
+      <!-- Dashboard -->
+      <section id="section-dashboard" class="page-section active">
+        <div class="kpi-grid">
+          <div class="kpi-card cyan"><div class="kpi-icon">💰</div><div class="kpi-value" id="kpi-revenue">215,682</div><div class="kpi-label">إجمالي التحصيلات (ر.س)</div></div>
+          <div class="kpi-card orange"><div class="kpi-icon">👥</div><div class="kpi-value" id="kpi-active">175</div><div class="kpi-label">عملاء نشطين</div></div>
+          <div class="kpi-card navy"><div class="kpi-icon">📝</div><div class="kpi-value" id="kpi-contracts">168</div><div class="kpi-label">عقود نشطة</div></div>
+          <div class="kpi-card danger"><div class="kpi-icon">⚠️</div><div class="kpi-value" id="kpi-overdue">0</div><div class="kpi-label">متأخرات</div></div>
+        </div>
+        <div class="charts-grid">
+          <div class="chart-card"><div class="card-header"><h3 class="card-title">التحصيلات الشهرية</h3></div><canvas id="chart-revenue"></canvas></div>
+          <div class="chart-card"><div class="card-header"><h3 class="card-title">توزيع الفنيين</h3></div><canvas id="chart-technicians"></canvas></div>
+        </div>
+        <div class="tech-grid" id="dashboard-techs"></div>
+      </section>
+
+      <!-- Customers -->
+      <section id="section-customers" class="page-section">
+        <div class="filter-bar">
+          <input type="text" class="form-input" id="customer-search" placeholder="بحث بالاسم أو الكود أو الجوال...">
+          <select class="form-select" id="filter-status"><option value="">كل الحالات</option><option value="يعمل">نشط</option><option value="متوقف">متوقف</option></select>
+          <select class="form-select" id="filter-tech"><option value="">كل الفنيين</option></select>
+          <select class="form-select" id="filter-district"><option value="">كل الأحياء</option></select>
+          <button class="btn btn-primary" onclick="openModal('customer-modal')">➕ إضافة عميل</button>
+        </div>
+        <div class="card"><div class="table-wrapper"><table id="customers-table"><thead><tr><th>الكود</th><th>اسم العميل</th><th>الجوال</th><th>الحي</th><th>الفني</th><th>الحالة</th><th>الاكتمال</th><th>إجراءات</th></tr></thead><tbody id="customers-tbody"></tbody></table></div></div>
+      </section>
+
+      <!-- Technicians -->
+      <section id="section-technicians" class="page-section">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+          <h2 style="color:var(--navy)">الفنيون</h2>
+          <button class="btn btn-primary" onclick="openModal('tech-modal')">➕ إضافة فني</button>
+        </div>
+        <div class="tech-grid" id="technicians-grid"></div>
+      </section>
+
+      <!-- Payments -->
+      <section id="section-payments" class="page-section">
+        <!-- KPI Row 1 -->
+        <div class="kpi-grid" id="pay-kpi-grid"></div>
+        <!-- KPI Row 2 -->
+        <div class="kpi-grid" id="pay-kpi-grid-2" style="margin-top:-8px"></div>
+
+        <!-- Tabs -->
+        <div class="tabs" id="pay-tabs" style="margin-bottom:0">
+          <div class="tab active" onclick="switchPayTab('overview')">📋 نظرة عامة</div>
+          <div class="tab" onclick="switchPayTab('unpaid')">🔴 لم يدفع</div>
+          <div class="tab" onclick="switchPayTab('overdue')">⚠️ متأخرين</div>
+          <div class="tab" onclick="switchPayTab('paid')">✅ دفعوا</div>
+          <div class="tab" onclick="switchPayTab('history')">📜 السجل</div>
+        </div>
+
+        <!-- Filters + Action Buttons -->
+        <div class="filter-bar" style="border-radius:0;margin-top:0">
+          <input type="text" class="form-input" id="payment-search" placeholder="بحث بالاسم أو الكود...">
+          <select class="form-select" id="filter-pay-month">
+            <option value="">الشهر الحالي</option>
+            <option value="1">يناير</option><option value="2">فبراير</option><option value="3">مارس</option>
+            <option value="4">أبريل</option><option value="5">مايو</option><option value="6">يونيو</option>
+            <option value="7">يوليو</option><option value="8">أغسطس</option><option value="9">سبتمبر</option>
+            <option value="10">أكتوبر</option><option value="11">نوفمبر</option><option value="12">ديسمبر</option>
+          </select>
+          <select class="form-select" id="filter-pay-tech"><option value="">كل الفنيين</option></select>
+          <button class="btn btn-orange" onclick="openModal('payment-modal')">➕ تسجيل دفعة</button>
+          <button class="btn btn-outline" style="color:var(--danger);border-color:var(--danger)" onclick="openBulkReminder()">📤 تذكير جماعي</button>
+          <button class="btn btn-outline" onclick="exportCollectionReport()">📥 تصدير</button>
+        </div>
+
+        <!-- Collection Table -->
+        <div class="card" style="border-radius:0 0 var(--radius) var(--radius)">
+          <div class="table-wrapper">
+            <table>
+              <thead><tr>
+                <th>#</th><th>الكود</th><th>العميل</th><th>الفني</th>
+                <th>قيمة العقد</th><th>المدفوع</th><th>المتبقي</th>
+                <th>الاستحقاق القادم</th><th>الحالة</th><th>إجراءات</th>
+              </tr></thead>
+              <tbody id="payments-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- Notifications -->
+      <section id="section-notifications" class="page-section">
+        <!-- KPI row -->
+        <div class="kpi-grid" id="notif-kpi-grid" style="margin-bottom:16px"></div>
+
+        <!-- Filters -->
+        <div class="filter-bar" style="border-radius:var(--radius);margin-bottom:16px">
+          <select class="form-select" id="notif-filter-level" onchange="_notifFilterLevel=this.value;renderNotifPage()">
+            <option value="">كل المستويات</option>
+            <option value="5">⚫ متأخر شديد (+30 يوم)</option>
+            <option value="4">🔴 متأخر متوسط (8-30 يوم)</option>
+            <option value="3">🟠 متأخر بسيط (1-7 أيام)</option>
+            <option value="2">🟡 استحقاق اليوم</option>
+            <option value="1">🟢 تذكير ودي</option>
+          </select>
+          <select class="form-select" id="notif-filter-tech" onchange="_notifFilterTech=this.value;renderNotifPage()">
+            <option value="">كل الفنيين</option>
+          </select>
+          <button class="btn btn-outline" style="color:var(--danger);border-color:var(--danger)" onclick="openNotifBulkReminder()">📤 تذكير جماعي للمتأخرين</button>
+          <button class="btn btn-outline" onclick="markAllDone()">✅ تحديد الكل مقروء</button>
+        </div>
+
+        <!-- Cards List -->
+        <div id="notif-page-content">
+          <div class="empty-state"><div class="icon">⏳</div><h3>جاري التحميل...</h3></div>
+        </div>
+      </section>
+
+      <!-- Contracts -->
+      <section id="section-contracts" class="page-section">
+        <div class="filter-bar">
+          <input type="text" class="form-input" id="contract-search" placeholder="بحث بالعميل أو رقم العقد...">
+          <select class="form-select" id="filter-contract-status"><option value="">كل الحالات</option><option value="نشط">نشط</option><option value="منتهي">منتهي</option></select>
+          <button class="btn btn-primary" onclick="openModal('contract-modal')">➕ عقد جديد</button>
+        </div>
+        <div class="card"><div class="table-wrapper"><table><thead><tr><th>الرقم المرجعي</th><th>العميل</th><th>المبلغ</th><th>البداية</th><th>النهاية</th><th>الحالة</th><th>إجراءات</th></tr></thead><tbody id="contracts-tbody"></tbody></table></div></div>
+      </section>
+
+      <!-- Visits -->
+      <section id="section-visits" class="page-section">
+        <div class="filter-bar">
+          <select class="form-select" id="filter-visit-tech"><option value="">كل الفنيين</option></select>
+          <input type="date" class="form-input" id="filter-visit-date" style="width:auto">
+          <button class="btn btn-cyan" onclick="generateDailyVisits()">📅 توليد زيارات اليوم</button>
+        </div>
+        <div id="visits-container"></div>
+      </section>
+
+      <!-- Documents -->
+      <section id="section-documents" class="page-section">
+        <h2 style="color:var(--navy);margin-bottom:20px">مولّد المستندات</h2>
+        <div class="kpi-grid">
+          <div class="kpi-card cyan" style="cursor:pointer" onclick="openDocTemplate('contract')"><div class="kpi-icon">📝</div><div class="kpi-label">عقد خدمة</div></div>
+          <div class="kpi-card orange" style="cursor:pointer" onclick="openDocTemplate('quote')"><div class="kpi-icon">💰</div><div class="kpi-label">عرض سعر</div></div>
+          <div class="kpi-card navy" style="cursor:pointer" onclick="openDocTemplate('invoice')"><div class="kpi-icon">🧾</div><div class="kpi-label">مطالبة مالية</div></div>
+          <div class="kpi-card success" style="cursor:pointer" onclick="openDocTemplate('cleaning-log')"><div class="kpi-icon">📋</div><div class="kpi-label">سجل تنظيف</div></div>
+        </div>
+        <div class="card" style="margin-top:20px"><div class="card-header"><h3 class="card-title">أرشيف المستندات</h3></div><div class="table-wrapper"><table><thead><tr><th>النوع</th><th>العميل</th><th>التاريخ</th><th>الحالة</th><th>إجراءات</th></tr></thead><tbody id="documents-tbody"></tbody></table></div></div>
+      </section>
+
+      <!-- Reports -->
+      <section id="section-reports" class="page-section">
+        <h2 style="color:var(--navy);margin-bottom:20px">التقارير</h2>
+        <div class="kpi-grid">
+          <div class="kpi-card cyan" style="cursor:pointer" onclick="generateReport('performance')"><div class="kpi-icon">📊</div><div class="kpi-label">تقرير الأداء الشامل</div></div>
+          <div class="kpi-card orange" style="cursor:pointer" onclick="generateReport('technicians')"><div class="kpi-icon">🔧</div><div class="kpi-label">ترتيب الفنيين</div></div>
+          <div class="kpi-card navy" style="cursor:pointer" onclick="generateReport('customers')"><div class="kpi-icon">👥</div><div class="kpi-label">بيانات العملاء</div></div>
+          <div class="kpi-card danger" style="cursor:pointer" onclick="generateReport('arrears')"><div class="kpi-icon">⚠️</div><div class="kpi-label">المتأخرات</div></div>
+        </div>
+        <div id="report-output" style="margin-top:20px"></div>
+      </section>
+
+      <!-- Data Quality -->
+      <section id="section-data-quality" class="page-section">
+        <h2 style="color:var(--navy);margin-bottom:20px">جودة البيانات</h2>
+        <div class="kpi-grid" id="dq-stats"></div>
+        <div class="card" style="margin-top:20px"><div class="card-header"><h3 class="card-title">عملاء ببيانات ناقصة</h3></div><div class="table-wrapper"><table><thead><tr><th>الكود</th><th>العميل</th><th>النسبة</th><th>الحقول الناقصة</th><th>إجراءات</th></tr></thead><tbody id="dq-tbody"></tbody></table></div></div>
+      </section>
+
+      <!-- Settings -->
+      <section id="section-settings" class="page-section">
+        <h2 style="color:var(--navy);margin-bottom:20px">الإعدادات</h2>
+        <div class="tabs">
+          <div class="tab active" onclick="switchSettingsTab('company')">بيانات الشركة</div>
+          <div class="tab" onclick="switchSettingsTab('splash')">الشاشة الترحيبية</div>
+          <div class="tab" onclick="switchSettingsTab('receivers')">المستلمون</div>
+          <div class="tab" onclick="switchSettingsTab('backup')">النسخ الاحتياطي</div>
+        </div>
+        <div id="settings-content"></div>
+      </section>
+
+    </div><!-- /page-content -->
+  </main>
+</div><!-- /app-wrapper -->
+
+<!-- ===== MODALS ===== -->
+
+<!-- Customer Modal -->
+<div id="customer-modal" class="modal-overlay">
+  <div class="modal modal-lg">
+    <div class="modal-header"><h3 class="modal-title" id="customer-modal-title">إضافة عميل جديد</h3><button class="modal-close" onclick="closeModal('customer-modal')">&times;</button></div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">اسم العميل *</label><input type="text" class="form-input" id="f-name-ar"></div>
+        <div class="form-group"><label class="form-label">الاسم بالإنجليزية</label><input type="text" class="form-input" id="f-name-en" dir="ltr"></div>
+      </div>
+      <div class="form-row-3">
+        <div class="form-group"><label class="form-label">رقم الجوال *</label><input type="tel" class="form-input" id="f-phone" dir="ltr"></div>
+        <div class="form-group"><label class="form-label">جوال السائق</label><input type="tel" class="form-input" id="f-driver-phone" dir="ltr"></div>
+        <div class="form-group"><label class="form-label">جوال الشغالة</label><input type="tel" class="form-input" id="f-maid-phone" dir="ltr"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">الحي *</label><select class="form-select" id="f-district"><option value="">اختر الحي</option></select></div>
+        <div class="form-group"><label class="form-label">الفني المسؤول *</label><select class="form-select" id="f-technician"><option value="">اختر الفني</option></select></div>
+      </div>
+      <div class="form-row-3">
+        <div class="form-group"><label class="form-label">عدد الزيارات الأسبوعية</label><select class="form-select" id="f-weekly-visits"><option value="1">1</option><option value="2" selected>2</option><option value="3">3</option><option value="4">4</option></select></div>
+        <div class="form-group"><label class="form-label">نوع المسبح</label><select class="form-select" id="f-pool-type"><option value="">غير محدد</option><option value="سكمير">سكمير</option><option value="أوفر فلو">أوفر فلو</option><option value="فايبر">فايبر</option></select></div>
+        <div class="form-group"><label class="form-label">عدد المسابح</label><input type="number" class="form-input" id="f-pool-count" value="1" min="1"></div>
+      </div>
+      <!-- ===== حقول المالية والعقد ===== -->
+      <div class="form-row-3">
+        <div class="form-group"><label class="form-label">الاشتراك الشهري (ر.س) *</label><input type="number" class="form-input" id="f-monthly-fee" dir="ltr" placeholder="0.00" min="0"></div>
+        <div class="form-group"><label class="form-label">مدة العقد (شهر)</label><select class="form-select" id="f-period-months"><option value="1">شهر</option><option value="3">3 أشهر</option><option value="6">6 أشهر</option><option value="12" selected>12 شهر (سنة)</option></select></div>
+        <div class="form-group"><label class="form-label">نظام الدفع</label><select class="form-select" id="f-payment-type"><option value="مقدم">مقدم</option><option value="متأخر" selected>متأخر</option></select></div>
+      </div>
+      <div class="form-group"><label class="form-label">تاريخ بداية العقد</label><input type="date" class="form-input" id="f-contract-start" dir="ltr"></div>
+      <div class="form-group">
+        <label class="form-label">أيام الزيارة</label>
+        <div class="day-checkboxes" id="f-visit-days">
+          <label class="day-check"><input type="checkbox" value="السبت" onchange="this.closest('.day-check').classList.toggle('selected',this.checked)">السبت</label>
+          <label class="day-check"><input type="checkbox" value="الأحد" onchange="this.closest('.day-check').classList.toggle('selected',this.checked)">الأحد</label>
+          <label class="day-check"><input type="checkbox" value="الإثنين" onchange="this.closest('.day-check').classList.toggle('selected',this.checked)">الإثنين</label>
+          <label class="day-check"><input type="checkbox" value="الثلاثاء" onchange="this.closest('.day-check').classList.toggle('selected',this.checked)">الثلاثاء</label>
+          <label class="day-check"><input type="checkbox" value="الأربعاء" onchange="this.closest('.day-check').classList.toggle('selected',this.checked)">الأربعاء</label>
+          <label class="day-check"><input type="checkbox" value="الخميس" onchange="this.closest('.day-check').classList.toggle('selected',this.checked)">الخميس</label>
+          <label class="day-check"><input type="checkbox" value="الجمعة" onchange="this.closest('.day-check').classList.toggle('selected',this.checked)">الجمعة</label>
+        </div>
+      </div>
+      <div class="form-group"><label class="form-label">ملاحظات</label><textarea class="form-textarea" id="f-notes"></textarea></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" onclick="saveCustomer()">💾 حفظ</button>
+      <button class="btn btn-outline" onclick="closeModal('customer-modal')">إلغاء</button>
+    </div>
+  </div>
+</div>
+
+<!-- Payment Modal -->
+<div id="payment-modal" class="modal-overlay">
+  <div class="modal modal-lg">
+    <div class="modal-header"><h3 class="modal-title">تسجيل دفعة جديدة</h3><button class="modal-close" onclick="closeModal('payment-modal')">&times;</button></div>
+    <div class="modal-body">
+      <div class="form-group"><label class="form-label">العميل *</label><select class="form-select" id="f-pay-customer" onchange="onPayCustomerChange()"><option value="">اختر العميل</option></select></div>
+      <!-- Customer due info (auto-populated) -->
+      <div id="pay-cust-info" style="display:none" class="collection-summary"></div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">نوع الدفعة *</label>
+          <select class="form-select" id="f-pay-type" onchange="onPayTypeChange()">
+            <option value="full">دفعة كاملة</option>
+            <option value="partial">دفعة جزئية</option>
+          </select>
+        </div>
+        <div class="form-group"><label class="form-label">المبلغ *</label><input type="number" class="form-input" id="f-pay-amount" dir="ltr" oninput="calcPayRemaining()"></div>
+        <div class="form-group"><label class="form-label">التاريخ *</label><input type="date" class="form-input" id="f-pay-date" dir="ltr"></div>
+      </div>
+      <!-- Partial payment remaining -->
+      <div id="pay-partial-info" style="display:none;background:rgba(245,158,11,0.08);padding:12px;border-radius:8px;margin-bottom:12px;font-size:0.9rem">
+        <div style="display:flex;justify-content:space-between"><span>المستحق على العميل:</span><strong id="pay-due-total">0 ر.س</strong></div>
+        <div style="display:flex;justify-content:space-between"><span>المبلغ المدفوع الآن:</span><strong id="pay-now" style="color:var(--success)">0 ر.س</strong></div>
+        <hr style="margin:8px 0;border-color:rgba(0,0,0,0.1)">
+        <div style="display:flex;justify-content:space-between"><span>المتبقي بعد الدفعة:</span><strong id="pay-remaining-after" style="color:var(--danger)">0 ر.س</strong></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">طريقة الاستلام</label><select class="form-select" id="f-pay-receiver"><option value="">اختر</option></select></div>
+        <div class="form-group"><label class="form-label">اسم الدافع (إذا مختلف)</label><input type="text" class="form-input" id="f-pay-payer"></div>
+      </div>
+      <div class="form-group"><label class="form-label">علاقة الدافع بالعميل</label><select class="form-select" id="f-pay-relation"><option value="">نفس العميل</option><option>زوج/زوجة</option><option>أب/أم</option><option>ابن/ابنة</option><option>كفيل</option><option>أخرى</option></select></div>
+      <!-- Receipt Upload -->
+      <div class="form-group">
+        <label class="form-label">📎 إرفاق إيصال (صورة أو PDF)</label>
+        <div class="receipt-upload-area" id="receipt-upload-area" onclick="document.getElementById('f-pay-receipt').click()">
+          <input type="file" id="f-pay-receipt" accept="image/*,.pdf" multiple style="display:none" onchange="previewReceipts(this)">
+          <div class="receipt-upload-placeholder" id="receipt-placeholder">
+            <span style="font-size:2rem">📄</span>
+            <p>اضغط هنا لإرفاق الإيصال</p>
+            <small style="color:var(--text-secondary)">صور (JPG, PNG) أو ملف PDF</small>
+          </div>
+          <div class="receipt-preview-list" id="receipt-preview-list" style="display:none"></div>
+        </div>
+      </div>
+      <div class="form-group"><label class="form-label">ملاحظات</label><textarea class="form-textarea" id="f-pay-notes"></textarea></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-orange" onclick="savePayment()">💾 حفظ الدفعة</button>
+      <button class="btn btn-outline" onclick="closeModal('payment-modal')">إلغاء</button>
+    </div>
+  </div>
+</div>
+
+<!-- Contract Modal -->
+<div id="contract-modal" class="modal-overlay">
+  <div class="modal modal-lg">
+    <div class="modal-header"><h3 class="modal-title">عقد جديد</h3><button class="modal-close" onclick="closeModal('contract-modal')">&times;</button></div>
+    <div class="modal-body">
+      <div class="form-group"><label class="form-label">العميل *</label><select class="form-select" id="f-con-customer"><option value="">اختر العميل</option></select></div>
+      <div class="form-row-3">
+        <div class="form-group"><label class="form-label">تاريخ البداية *</label><input type="date" class="form-input" id="f-con-start" dir="ltr"></div>
+        <div class="form-group"><label class="form-label">مدة العقد</label><select class="form-select" id="f-con-period"><option value="1">شهر</option><option value="3">3 أشهر</option><option value="6" selected>6 أشهر</option><option value="12">سنة</option></select></div>
+        <div class="form-group"><label class="form-label">قيمة العقد *</label><input type="number" class="form-input" id="f-con-amount" dir="ltr"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">طريقة الدفع</label><select class="form-select" id="f-con-paytype"><option value="مقدم">مقدم</option><option value="متأخر">متأخر</option></select></div>
+        <div class="form-group"><label class="form-label">أشهر مجانية</label><input type="number" class="form-input" id="f-con-free" value="0" min="0" dir="ltr"></div>
+      </div>
+      <div class="form-group"><label class="form-label">ملاحظات</label><textarea class="form-textarea" id="f-con-notes"></textarea></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" onclick="saveContract()">💾 حفظ العقد</button>
+      <button class="btn btn-outline" onclick="closeModal('contract-modal')">إلغاء</button>
+    </div>
+  </div>
+</div>
+
+<!-- Technician Modal -->
+<div id="tech-modal" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-header"><h3 class="modal-title" id="tech-modal-title">إضافة فني</h3><button class="modal-close" onclick="closeModal('tech-modal')">&times;</button></div>
+    <div class="modal-body">
+      <div class="form-group"><label class="form-label">اسم الفني *</label><input type="text" class="form-input" id="f-tech-name"></div>
+      <div class="form-group"><label class="form-label">رقم الجوال</label><input type="tel" class="form-input" id="f-tech-phone" dir="ltr"></div>
+      <div class="form-group"><label class="form-label">الراتب الأساسي (ر.س)</label><input type="number" class="form-input" id="f-tech-salary" dir="ltr" placeholder="0.00" min="0"></div>
+      <div class="form-group"><label class="form-label">ملاحظات</label><textarea class="form-textarea" id="f-tech-notes"></textarea></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" onclick="saveTechnician()">💾 حفظ</button>
+      <button class="btn btn-outline" onclick="closeModal('tech-modal')">إلغاء</button>
+    </div>
+  </div>
+</div>
+
+<!-- Scripts -->
+<script src="js/utils.js"></script>
+<script src="js/supabase.js"></script>
+<script src="js/dashboard.js"></script>
+<script src="js/customers.js"></script>
+<script src="js/payments.js"></script>
+<script src="js/pages.js"></script>
+<script src="js/reports.js"></script>
+<script src="js/notifications.js"></script>
+<script src="js/accounting.js"></script>
+<script src="js/splash.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
