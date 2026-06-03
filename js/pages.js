@@ -322,6 +322,8 @@ function openDocModal() {
               <option value="">اختر النوع</option>
               <option value="إقامة">إقامة</option>
               <option value="كرت عمل">كرت عمل</option>
+              <option value="تأمين طبي">تأمين طبي</option>
+              <option value="جواز سفر">جواز سفر</option>
             </select>
           </div>
         </div>
