@@ -327,9 +327,15 @@ function openDocModal() {
             </select>
           </div>
         </div>
-        <div class="form-group">
-          <label class="form-label">تاريخ التجديد *</label>
-          <input type="date" class="form-input" id="doc-date" value="${today}" dir="ltr">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">تاريخ التجديد *</label>
+            <input type="date" class="form-input" id="doc-date" value="${today}" dir="ltr">
+          </div>
+          <div class="form-group">
+            <label class="form-label">التكلفة (للتسجيل في المحاسبة)</label>
+            <input type="number" class="form-input" id="doc-cost" min="0" placeholder="0.00" dir="ltr">
+          </div>
         </div>
         <div class="form-group"><label class="form-label">ملاحظات</label>
           <textarea class="form-textarea" id="doc-notes"></textarea></div>
@@ -347,6 +353,7 @@ async function saveEmpDoc() {
   const techId  = document.getElementById('doc-tech')?.value;
   const docType = document.getElementById('doc-type')?.value;
   const date    = document.getElementById('doc-date')?.value;
+  const cost    = parseFloat(document.getElementById('doc-cost')?.value) || 0;
   const notes   = document.getElementById('doc-notes')?.value.trim() || null;
 
   if (!techId)  { showToast('يرجى اختيار الموظف', 'error'); return; }
@@ -362,6 +369,21 @@ async function saveEmpDoc() {
                 renewal_date: date, notes })
       .select().single();
     if (error) throw error;
+    
+    // التزامن التلقائي مع المحاسبة (المصروفات) إذا أدخل التكلفة
+    if (cost > 0) {
+      const techObj = (STATE.technicians || []).find(t => t.id == techId);
+      const techName = techObj ? techObj.name : '';
+      const expDesc = techName ? `${techName} — ${notes || 'تزامن من سجل وثائق الموظفين'}` : (notes || 'تزامن من سجل وثائق الموظفين');
+      const { data: expData, error: expError } = await window.db.from('expenses').insert({
+        date: date, category: docType, amount: cost, bank_account: 'الأهلي', description: expDesc, approved_by: 'المدير'
+      }).select();
+      if (!expError && expData && expData.length > 0 && window.ACC && window.ACC.expenses) {
+        window.ACC.expenses.unshift(expData[0]);
+        if (typeof renderExpensesTable === 'function') renderExpensesTable();
+      }
+    }
+
     STATE.empDocs = STATE.empDocs || [];
     STATE.empDocs.unshift(data);
     document.getElementById('doc-modal-overlay')?.remove();

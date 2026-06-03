@@ -1022,6 +1022,23 @@ async function saveExpense() {
 
   if (error) { showToast('خطأ في الحفظ', 'error'); return; }
   ACC.expenses.unshift(data[0]);
+
+  // التزامن التلقائي مع سجل وثائق الموظفين
+  const docCategories = ['تجديد إقامة', 'تجديد كرت عمل', 'تجديد جواز سفر', 'تأمين طبي'];
+  if (docCategories.includes(cat) && tech) {
+    const techObj = (STATE.technicians || []).find(t => t.name === tech);
+    if (techObj) {
+      const { data: docData, error: docError } = await db.from('employee_documents')
+        .insert({ technician_id: techObj.id, doc_type: cat, renewal_date: date, notes: `تزامن من المحاسبة: ${amount} ر.س` })
+        .select().single();
+      if (!docError && docData) {
+        STATE.empDocs = STATE.empDocs || [];
+        STATE.empDocs.unshift(docData);
+        if (typeof renderDocsSection === 'function') renderDocsSection();
+      }
+    }
+  }
+
   closeGenericModal();
   showToast('تم إضافة المصروف ✅', 'success');
   renderExpensesTable();
