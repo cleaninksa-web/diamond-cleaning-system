@@ -943,6 +943,15 @@ function renderExpensePie(catMap) {
   });
 }
 
+function toggleExpenseTech() {
+  const cat = document.getElementById('exp-f-cat')?.value;
+  const row = document.getElementById('exp-tech-row');
+  const empCategories = ['تكلفة سفرة إجازة', 'تجديد إقامة', 'تجديد كرت عمل', 'تجديد جواز سفر', 'تأمين طبي'];
+  if (row) {
+    row.style.display = empCategories.includes(cat) ? 'flex' : 'none';
+  }
+}
+
 function openExpenseModal() {
   const bankOpts = ACC.bankAccounts.map(b =>
     `<option value="${b.bank_name}">${b.bank_name}</option>`).join('') || '<option value="الأهلي">الأهلي</option>';
@@ -952,7 +961,7 @@ function openExpenseModal() {
     <div class="form-group"><label class="form-label">التاريخ *</label>
       <input type="date" class="form-input" id="exp-f-date" value="${new Date().toISOString().split('T')[0]}" dir="ltr"></div>
     <div class="form-group"><label class="form-label">التصنيف *</label>
-      <select class="form-select" id="exp-f-cat">
+      <select class="form-select" id="exp-f-cat" onchange="toggleExpenseTech()">
         <option value="ديزل">⛽ ديزل</option>
         <option value="رواتب">💼 رواتب</option>
         <option value="إيجار">🏠 إيجار</option>
@@ -961,6 +970,18 @@ function openExpenseModal() {
         <option value="معدات">🔧 معدات</option>
         <option value="مصروف ميداني">🧾 مصروف ميداني</option>
         <option value="أخرى">📋 أخرى</option>
+        <option value="تكلفة سفرة إجازة">✈️ تكلفة سفرة إجازة</option>
+        <option value="تجديد إقامة">📄 تجديد إقامة</option>
+        <option value="تجديد كرت عمل">💳 تجديد كرت عمل</option>
+        <option value="تجديد جواز سفر">🛂 تجديد جواز سفر</option>
+        <option value="تأمين طبي">🏥 تأمين طبي</option>
+      </select></div>
+  </div>
+  <div class="form-row" id="exp-tech-row" style="display:none">
+    <div class="form-group" style="width:100%"><label class="form-label">الموظف *</label>
+      <select class="form-select" id="exp-f-tech">
+        <option value="">اختر الموظف</option>
+        ${(window.STATE?.technicians || []).map(t => `<option value="${t.name}">${t.name}</option>`).join('')}
       </select></div>
   </div>
   <div class="form-row">
@@ -980,7 +1001,18 @@ async function saveExpense() {
   const cat    = document.getElementById('exp-f-cat')?.value;
   const amount = parseFloat(document.getElementById('exp-f-amount')?.value);
   const bank   = document.getElementById('exp-f-bank')?.value || 'الأهلي';
-  const desc   = document.getElementById('exp-f-desc')?.value;
+  let desc     = document.getElementById('exp-f-desc')?.value || '';
+  const tech   = document.getElementById('exp-f-tech')?.value;
+
+  const empCategories = ['تكلفة سفرة إجازة', 'تجديد إقامة', 'تجديد كرت عمل', 'تجديد جواز سفر', 'تأمين طبي'];
+  if (empCategories.includes(cat) && !tech) {
+    showToast('يرجى اختيار الموظف', 'warning'); 
+    return; 
+  }
+
+  if (empCategories.includes(cat) && tech) {
+    desc = desc ? `${tech} — ${desc}` : tech;
+  }
 
   if (!date || !cat || !amount || amount <= 0) { showToast('يرجى تعبئة الحقول المطلوبة', 'warning'); return; }
 
