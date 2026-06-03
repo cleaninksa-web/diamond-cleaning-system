@@ -45,6 +45,10 @@ async function load_technicians() {
         </div>
       </div>`;
   }).join('');
+
+  // عرض القسمين الجديدين
+  renderLeavesSection();
+  renderDocsSection();
 }
 
 async function saveTechnician() {
@@ -98,6 +102,287 @@ async function saveTechnician() {
     console.error(err);
   } finally {
     if (btn) { btn.disabled = false; btn.textContent = '💾 حفظ'; }
+  }
+}
+
+// ───────────────────────────────────────────
+// سجل الإجازات
+// ───────────────────────────────────────────
+function renderLeavesSection() {
+  let container = document.getElementById('leaves-section');
+  if (!container) {
+    container = document.createElement('div');
+    container.id = 'leaves-section';
+    container.style.marginTop = '32px';
+    const techSection = document.getElementById('section-technicians');
+    if (techSection) techSection.appendChild(container);
+  }
+
+  const leaves = window.STATE.leaves || [];
+  const techs  = window.STATE.technicians || [];
+
+  const rows = leaves.length === 0
+    ? `<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--text-secondary)">لا توجد سجلات بعد</td></tr>`
+    : leaves.map(l => {
+        const techName = techs.find(t => t.id === l.technician_id)?.name || '—';
+        return `<tr>
+          <td>${techName}</td>
+          <td>${formatDateShort(l.leave_start)}</td>
+          <td>${formatDateShort(l.leave_end)}</td>
+          <td>${l.actual_return ? formatDateShort(l.actual_return) : '—'}</td>
+          <td>${l.travel_cost ? formatCurrency(l.travel_cost) : '—'}</td>
+          <td>${l.notes || '—'}</td>
+          <td><button class="btn btn-sm btn-outline" style="color:var(--danger)"
+              onclick="deleteLeave(${l.id})">🗑️</button></td>
+        </tr>`;
+      }).join('');
+
+  container.innerHTML = `
+    <div class="card">
+      <div class="card-header" style="display:flex;justify-content:space-between;align-items:center">
+        <h3 class="card-title">🏖️ سجل الإجازات</h3>
+        <button class="btn btn-primary btn-sm" onclick="openLeaveModal()">➕ إضافة إجازة</button>
+      </div>
+      <div class="table-wrapper">
+        <table>
+          <thead><tr>
+            <th>الموظف</th><th>من</th><th>إلى</th>
+            <th>الرجوع الفعلي</th><th>تكلفة السفرة</th>
+            <th>ملاحظة</th><th>حذف</th>
+          </tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
+    </div>`;
+}
+
+function openLeaveModal() {
+  const techs = window.STATE.technicians || [];
+  const techOptions = techs.map(t => `<option value="${t.id}">${t.name}</option>`).join('');
+  const today = new Date().toISOString().split('T')[0];
+
+  document.getElementById('leave-modal-overlay')?.remove();
+  const modal = document.createElement('div');
+  modal.id = 'leave-modal-overlay';
+  modal.className = 'modal-overlay show';
+  modal.innerHTML = `
+    <div class="modal modal-lg">
+      <div class="modal-header">
+        <h3 class="modal-title">🏖️ إضافة إجازة</h3>
+        <button class="modal-close" onclick="document.getElementById('leave-modal-overlay').remove()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">الموظف *</label>
+          <select class="form-select" id="lv-tech"><option value="">اختر الموظف</option>${techOptions}</select>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">تاريخ البداية *</label>
+            <input type="date" class="form-input" id="lv-start" value="${today}" dir="ltr"></div>
+          <div class="form-group"><label class="form-label">تاريخ النهاية *</label>
+            <input type="date" class="form-input" id="lv-end" value="${today}" dir="ltr"></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">تاريخ الرجوع الفعلي</label>
+            <input type="date" class="form-input" id="lv-return" dir="ltr"></div>
+          <div class="form-group"><label class="form-label">تكلفة السفرة (ر.س)</label>
+            <input type="number" class="form-input" id="lv-cost" min="0" placeholder="اختياري" dir="ltr"></div>
+        </div>
+        <div class="form-group"><label class="form-label">ملاحظات</label>
+          <textarea class="form-textarea" id="lv-notes"></textarea></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" onclick="saveLeave()">💾 حفظ</button>
+        <button class="btn btn-outline" onclick="document.getElementById('leave-modal-overlay').remove()">إلغاء</button>
+      </div>
+    </div>`;
+  modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+  document.body.appendChild(modal);
+}
+
+async function saveLeave() {
+  const techId = document.getElementById('lv-tech')?.value;
+  const start  = document.getElementById('lv-start')?.value;
+  const end    = document.getElementById('lv-end')?.value;
+  const ret    = document.getElementById('lv-return')?.value || null;
+  const cost   = parseFloat(document.getElementById('lv-cost')?.value) || null;
+  const notes  = document.getElementById('lv-notes')?.value.trim() || null;
+
+  if (!techId) { showToast('يرجى اختيار الموظف', 'error'); return; }
+  if (!start)  { showToast('يرجى تحديد تاريخ البداية', 'error'); return; }
+  if (!end)    { showToast('يرجى تحديد تاريخ النهاية', 'error'); return; }
+
+  const btn = document.querySelector('#leave-modal-overlay .btn-primary');
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ جاري الحفظ...'; }
+
+  try {
+    const { data, error } = await window.db.from('employee_leaves')
+      .insert({ technician_id: parseInt(techId), leave_start: start,
+                leave_end: end, actual_return: ret, travel_cost: cost, notes })
+      .select().single();
+    if (error) throw error;
+    STATE.leaves = STATE.leaves || [];
+    STATE.leaves.unshift(data);
+    document.getElementById('leave-modal-overlay')?.remove();
+    showToast('تم تسجيل الإجازة ✅', 'success');
+    renderLeavesSection();
+  } catch (err) {
+    showToast('خطأ في الحفظ: ' + err.message, 'error');
+    console.error(err);
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = '💾 حفظ'; }
+  }
+}
+
+async function deleteLeave(id) {
+  if (!confirm('هل تريد حذف هذا السجل؟')) return;
+  try {
+    const { error } = await window.db.from('employee_leaves').delete().eq('id', id);
+    if (error) throw error;
+    STATE.leaves = (STATE.leaves || []).filter(l => l.id !== id);
+    showToast('تم الحذف ✅', 'success');
+    renderLeavesSection();
+  } catch (err) {
+    showToast('خطأ في الحذف: ' + err.message, 'error');
+  }
+}
+
+// ───────────────────────────────────────────
+// سجل تجديد الوثائق
+// ───────────────────────────────────────────
+function renderDocsSection() {
+  let container = document.getElementById('emp-docs-section');
+  if (!container) {
+    container = document.createElement('div');
+    container.id = 'emp-docs-section';
+    container.style.marginTop = '24px';
+    const techSection = document.getElementById('section-technicians');
+    if (techSection) techSection.appendChild(container);
+  }
+
+  const docs  = window.STATE.empDocs || [];
+  const techs = window.STATE.technicians || [];
+
+  const rows = docs.length === 0
+    ? `<tr><td colspan="5" style="text-align:center;padding:24px;color:var(--text-secondary)">لا توجد سجلات بعد</td></tr>`
+    : docs.map(d => {
+        const techName = techs.find(t => t.id === d.technician_id)?.name || '—';
+        return `<tr>
+          <td>${techName}</td>
+          <td><span class="badge badge-active">${d.doc_type}</span></td>
+          <td>${formatDateShort(d.renewal_date)}</td>
+          <td>${d.notes || '—'}</td>
+          <td><button class="btn btn-sm btn-outline" style="color:var(--danger)"
+              onclick="deleteEmpDoc(${d.id})">🗑️</button></td>
+        </tr>`;
+      }).join('');
+
+  container.innerHTML = `
+    <div class="card">
+      <div class="card-header" style="display:flex;justify-content:space-between;align-items:center">
+        <h3 class="card-title">📄 سجل تجديد الوثائق</h3>
+        <button class="btn btn-primary btn-sm" onclick="openDocModal()">➕ إضافة تجديد</button>
+      </div>
+      <div class="table-wrapper">
+        <table>
+          <thead><tr>
+            <th>الموظف</th><th>نوع الوثيقة</th>
+            <th>تاريخ التجديد</th><th>ملاحظة</th><th>حذف</th>
+          </tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
+    </div>`;
+}
+
+function openDocModal() {
+  const techs = window.STATE.technicians || [];
+  const techOptions = techs.map(t => `<option value="${t.id}">${t.name}</option>`).join('');
+  const today = new Date().toISOString().split('T')[0];
+
+  document.getElementById('doc-modal-overlay')?.remove();
+  const modal = document.createElement('div');
+  modal.id = 'doc-modal-overlay';
+  modal.className = 'modal-overlay show';
+  modal.innerHTML = `
+    <div class="modal modal-lg">
+      <div class="modal-header">
+        <h3 class="modal-title">📄 إضافة تجديد وثيقة</h3>
+        <button class="modal-close" onclick="document.getElementById('doc-modal-overlay').remove()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">الموظف *</label>
+            <select class="form-select" id="doc-tech"><option value="">اختر الموظف</option>${techOptions}</select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">نوع الوثيقة *</label>
+            <select class="form-select" id="doc-type">
+              <option value="">اختر النوع</option>
+              <option value="إقامة">إقامة</option>
+              <option value="كرت عمل">كرت عمل</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">تاريخ التجديد *</label>
+          <input type="date" class="form-input" id="doc-date" value="${today}" dir="ltr">
+        </div>
+        <div class="form-group"><label class="form-label">ملاحظات</label>
+          <textarea class="form-textarea" id="doc-notes"></textarea></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" onclick="saveEmpDoc()">💾 حفظ</button>
+        <button class="btn btn-outline" onclick="document.getElementById('doc-modal-overlay').remove()">إلغاء</button>
+      </div>
+    </div>`;
+  modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+  document.body.appendChild(modal);
+}
+
+async function saveEmpDoc() {
+  const techId  = document.getElementById('doc-tech')?.value;
+  const docType = document.getElementById('doc-type')?.value;
+  const date    = document.getElementById('doc-date')?.value;
+  const notes   = document.getElementById('doc-notes')?.value.trim() || null;
+
+  if (!techId)  { showToast('يرجى اختيار الموظف', 'error'); return; }
+  if (!docType) { showToast('يرجى اختيار نوع الوثيقة', 'error'); return; }
+  if (!date)    { showToast('يرجى تحديد تاريخ التجديد', 'error'); return; }
+
+  const btn = document.querySelector('#doc-modal-overlay .btn-primary');
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ جاري الحفظ...'; }
+
+  try {
+    const { data, error } = await window.db.from('employee_documents')
+      .insert({ technician_id: parseInt(techId), doc_type: docType,
+                renewal_date: date, notes })
+      .select().single();
+    if (error) throw error;
+    STATE.empDocs = STATE.empDocs || [];
+    STATE.empDocs.unshift(data);
+    document.getElementById('doc-modal-overlay')?.remove();
+    showToast('تم تسجيل التجديد ✅', 'success');
+    renderDocsSection();
+  } catch (err) {
+    showToast('خطأ في الحفظ: ' + err.message, 'error');
+    console.error(err);
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = '💾 حفظ'; }
+  }
+}
+
+async function deleteEmpDoc(id) {
+  if (!confirm('هل تريد حذف هذا السجل؟')) return;
+  try {
+    const { error } = await window.db.from('employee_documents').delete().eq('id', id);
+    if (error) throw error;
+    STATE.empDocs = (STATE.empDocs || []).filter(d => d.id !== id);
+    showToast('تم الحذف ✅', 'success');
+    renderDocsSection();
+  } catch (err) {
+    showToast('خطأ في الحذف: ' + err.message, 'error');
   }
 }
 

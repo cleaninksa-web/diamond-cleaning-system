@@ -94,6 +94,20 @@ async function loadDataFromSupabase() {
       ...STATE.technicians.map(t => ({ id: t.id, name: t.name, type: 'فرد' })),
     ];
 
+    // سجل الإجازات
+    const { data: leaves } = await db
+      .from('employee_leaves')
+      .select('*')
+      .order('leave_start', { ascending: false });
+    STATE.leaves = leaves || [];
+
+    // سجل تجديد الوثائق
+    const { data: empDocs } = await db
+      .from('employee_documents')
+      .select('*')
+      .order('renewal_date', { ascending: false });
+    STATE.empDocs = empDocs || [];
+
     STATE.loaded = true;
     STATE.useSupabase = true;
     console.log(`✅ تم تحميل البيانات من Supabase`);
