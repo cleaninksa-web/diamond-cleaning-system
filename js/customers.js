@@ -134,6 +134,8 @@ function viewCustomer(id) {
       <div><strong>الحالة:</strong> ${statusBadge(c.status)}</div>
       <div><strong>الجوال:</strong> <span dir="ltr">${formatPhone(c.phone)}</span></div>
       <div><strong>الحي:</strong> ${c.district || '-'}</div>
+      ${c.house_number ? `<div><strong>رقم المنزل:</strong> ${c.house_number}</div>` : ''}
+      ${c.job_title ? `<div><strong>المسمى الوظيفي:</strong> ${c.job_title}</div>` : ''}
       <div><strong>الفني:</strong> ${c.technician_name || '-'}</div>
       <div><strong>نوع المسبح:</strong> ${c.pool_type || '-'}</div>
       <div><strong>الاشتراك الشهري:</strong> ${formatCurrency(c.monthly_subscription)}</div>
@@ -173,6 +175,11 @@ function editCustomer(id) {
   if (fPayType) fPayType.value = c.payment_type || 'متأخر';
   const fStart = document.getElementById('f-contract-start');
   if (fStart) fStart.value = c.contract_start || '';
+  // الحقلان الجديدان
+  const fJob = document.getElementById('f-job-title');
+  if (fJob) fJob.value = c.job_title || '';
+  const fHouse = document.getElementById('f-house-number');
+  if (fHouse) fHouse.value = c.house_number || '';
   // تعبئة أيام الزيارة
   const savedDays = c.visit_days ? c.visit_days.split(',') : [];
   document.querySelectorAll('#f-visit-days input[type="checkbox"]').forEach(cb => {
@@ -205,6 +212,8 @@ async function saveCustomer() {
     contract_start:       document.getElementById('f-contract-start')?.value || null,
     payment_type:         document.getElementById('f-payment-type')?.value || 'متأخر',
     notes:                document.getElementById('f-notes')?.value || '',
+    job_title:            document.getElementById('f-job-title')?.value?.trim() || null,
+    house_number:         document.getElementById('f-house-number')?.value?.trim() || null,
     // أيام الزيارة من checkboxes
     visit_days: Array.from(document.querySelectorAll('#f-visit-days input[type="checkbox"]:checked'))
                      .map(cb => cb.value).join(',') || null,

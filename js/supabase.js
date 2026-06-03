@@ -127,6 +127,8 @@ async function saveCustomerToDB(formData) {
     weekly_visits:  parseInt(formData.weekly_visits) || 2,
     visit_days:     formData.visit_days || null,
     notes:          formData.notes || null,
+    job_title:      formData.job_title || null,
+    house_number:   formData.house_number || null,
     status:         'يعمل',
     updated_at:     new Date().toISOString(),
   };
@@ -164,6 +166,8 @@ async function updateCustomerInDB(id, formData) {
     weekly_visits:  parseInt(formData.weekly_visits) || 2,
     visit_days:     formData.visit_days || null,
     notes:          formData.notes || null,
+    job_title:      formData.job_title || null,
+    house_number:   formData.house_number || null,
     updated_at:     new Date().toISOString(),
   };
 
