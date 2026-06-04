@@ -1028,10 +1028,16 @@ async function saveExpense() {
   if (docCategories.includes(cat) && tech) {
     const techObj = (STATE.technicians || []).find(t => t.name === tech);
     if (techObj) {
+      const expenseId = data[0].id;
       const { data: docData, error: docError } = await db.from('employee_documents')
-        .insert({ technician_id: techObj.id, doc_type: cat, renewal_date: date, notes: `تزامن من المحاسبة: ${amount} ر.س` })
+        .insert({ technician_id: techObj.id, doc_type: cat, renewal_date: date,
+                  notes: `ربط_محاسبة:${expenseId}|مبلغ:${amount} ر.س` })
         .select().single();
       if (!docError && docData) {
+        // سجّل ID الوثيقة في وصف المصروف لاستخدامه عند الحذف
+        await db.from('expenses').update({ description: `${desc || ''}||ربط_وثيقة:${docData.id}` }).eq('id', expenseId);
+        data[0].description = (data[0].description || '') + `||ربط_وثيقة:${docData.id}`;
+        ACC.expenses[0] = data[0];
         STATE.empDocs = STATE.empDocs || [];
         STATE.empDocs.unshift(docData);
         if (typeof renderDocsSection === 'function') renderDocsSection();
@@ -1046,6 +1052,21 @@ async function saveExpense() {
 
 async function deleteExpense(id) {
   if (!confirm('هل تريد حذف هذا المصروف؟')) return;
+
+  // ابحث عن سجل وثيقة مرتبط واحذفه أيضاً
+  const expRecord = (ACC.expenses || []).find(e => e.id === id);
+  if (expRecord?.description) {
+    const docMatch = expRecord.description.match(/ربط_وثيقة:(\d+)/);
+    if (docMatch) {
+      const linkedDocId = parseInt(docMatch[1]);
+      const { error: docDelErr } = await window.db.from('employee_documents').delete().eq('id', linkedDocId);
+      if (!docDelErr) {
+        STATE.empDocs = (STATE.empDocs || []).filter(d => d.id !== linkedDocId);
+        if (typeof renderDocsSection === 'function') renderDocsSection();
+      }
+    }
+  }
+
   const { error } = await db.from('expenses').delete().eq('id', id);
   if (error) { showToast('خطأ في الحذف', 'error'); return; }
   ACC.expenses = ACC.expenses.filter(e => e.id !== id);

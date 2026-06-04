@@ -364,22 +364,30 @@ async function saveEmpDoc() {
   if (btn) { btn.disabled = true; btn.textContent = '⏳ جاري الحفظ...'; }
 
   try {
+    // أولاً: أنشئ سجل الوثيقة
     const { data, error } = await window.db.from('employee_documents')
       .insert({ technician_id: parseInt(techId), doc_type: docType,
                 renewal_date: date, notes })
       .select().single();
     if (error) throw error;
     
-    // التزامن التلقائي مع المحاسبة (المصروفات) إذا أدخل التكلفة
+    // ثانياً: إذا أدخل تكلفة ← أنشئ مصروف مرتبط
     if (cost > 0) {
       const techObj = (STATE.technicians || []).find(t => t.id == techId);
       const techName = techObj ? techObj.name : '';
-      const expDesc = techName ? `${techName} — ${notes || 'تزامن من سجل وثائق الموظفين'}` : (notes || 'تزامن من سجل وثائق الموظفين');
+      const expDesc = `${techName ? techName + ' — ' : ''}${notes || 'تجديد وثيقة'}||ربط_وثيقة:${data.id}`;
       const { data: expData, error: expError } = await window.db.from('expenses').insert({
-        date: date, category: docType, amount: cost, bank_account: 'الأهلي', description: expDesc, approved_by: 'المدير'
+        date, category: docType, amount: cost, bank_account: 'الأهلي',
+        description: expDesc, approved_by: 'المدير'
       }).select();
-      if (!expError && expData && expData.length > 0 && window.ACC && window.ACC.expenses) {
-        window.ACC.expenses.unshift(expData[0]);
+      if (!expError && expData && expData.length > 0) {
+        // حدّث notes الوثيقة بالربط مع المصروف
+        const expId = expData[0].id;
+        await window.db.from('employee_documents')
+          .update({ notes: `ربط_محاسبة:${expId}|${notes || ''}` })
+          .eq('id', data.id);
+        data.notes = `ربط_محاسبة:${expId}|${notes || ''}`;
+        if (window.ACC && window.ACC.expenses) window.ACC.expenses.unshift(expData[0]);
         if (typeof renderExpensesTable === 'function') renderExpensesTable();
       }
     }
@@ -400,6 +408,22 @@ async function saveEmpDoc() {
 async function deleteEmpDoc(id) {
   if (!confirm('هل تريد حذف هذا السجل؟')) return;
   try {
+    // ابحث عن مصروف مرتبط واحذفه أيضاً
+    const docRecord = (STATE.empDocs || []).find(d => d.id === id);
+    if (docRecord?.notes) {
+      const expMatch = docRecord.notes.match(/ربط_محاسبة:(\d+)/);
+      if (expMatch) {
+        const linkedExpId = parseInt(expMatch[1]);
+        const { error: expDelErr } = await window.db.from('expenses').delete().eq('id', linkedExpId);
+        if (!expDelErr) {
+          if (window.ACC && window.ACC.expenses) {
+            window.ACC.expenses = window.ACC.expenses.filter(e => e.id !== linkedExpId);
+            if (typeof renderExpensesTable === 'function') renderExpensesTable();
+          }
+        }
+      }
+    }
+
     const { error } = await window.db.from('employee_documents').delete().eq('id', id);
     if (error) throw error;
     STATE.empDocs = (STATE.empDocs || []).filter(d => d.id !== id);
