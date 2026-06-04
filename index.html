@@ -54,46 +54,74 @@
 <div class="sidebar-overlay"></div>
 
 <!-- ===== APP WRAPPER ===== -->
-<div class="app-wrapper">
+<div class="app-wrapper" id="app-wrapper">
 
   <!-- SIDEBAR -->
-  <aside class="sidebar">
-    <div class="sidebar-logo">
-      <img src="assets/logo.png" alt="التنظيف الماسي">
+  <aside class="sidebar" id="main-sidebar">
+    <!-- User Card -->
+    <div class="sidebar-user-card">
+      <div class="sidebar-avatar">عم</div>
+      <div class="sidebar-user-info">
+        <div class="sidebar-user-name">عبدالله محمد</div>
+        <div class="sidebar-user-role">مدير النظام</div>
+      </div>
     </div>
+
     <nav class="sidebar-nav">
-      <a class="nav-item active" data-route="dashboard"><span class="icon">📊</span>لوحة التحكم</a>
-      <a class="nav-item" data-route="customers"><span class="icon">👥</span>العملاء</a>
-      <a class="nav-item" data-route="technicians"><span class="icon">🔧</span>الفنيون</a>
+      <!-- القائمة الرئيسية -->
+      <div class="nav-section-label">القائمة الرئيسية</div>
+      <a class="nav-item active" data-route="dashboard"><span class="icon">🏠</span><span class="nav-label">لوحة التحكم</span></a>
+      <a class="nav-item" data-route="customers"><span class="icon">👥</span><span class="nav-label">العملاء</span></a>
+      <a class="nav-item" data-route="payments"><span class="icon">💰</span><span class="nav-label">التحصيلات</span></a>
+      <a class="nav-item" data-route="accounting"><span class="icon">📒</span><span class="nav-label">المحاسبة</span></a>
+
+      <!-- الإدارة -->
+      <div class="nav-section-label">الإدارة</div>
+      <a class="nav-item" data-route="technicians"><span class="icon">👷</span><span class="nav-label">الموظفون</span></a>
+      <a class="nav-item" data-route="contracts"><span class="icon">📋</span><span class="nav-label">العقود</span></a>
+      <a class="nav-item" data-route="visits"><span class="icon">🗺️</span><span class="nav-label">الزيارات</span></a>
+      <a class="nav-item" data-route="notifications"><span class="icon">🔔</span><span class="nav-label">التنبيهات</span><span id="nav-notif-badge" class="nav-badge" style="display:none">0</span></a>
+      <a class="nav-item" data-route="reports"><span class="icon">📈</span><span class="nav-label">التقارير</span></a>
+      <a class="nav-item" data-route="documents"><span class="icon">📄</span><span class="nav-label">المستندات</span></a>
+      <a class="nav-item" data-route="data-quality"><span class="icon">✅</span><span class="nav-label">جودة البيانات</span></a>
+
       <div class="nav-divider"></div>
-      <a class="nav-item" data-route="payments"><span class="icon">💰</span>التحصيلات</a>
-      <a class="nav-item" data-route="contracts"><span class="icon">📝</span>العقود</a>
-      <a class="nav-item" data-route="visits"><span class="icon">📅</span>الزيارات</a>
-      <div class="nav-divider"></div>
-      <a class="nav-item" data-route="accounting"><span class="icon">🏦</span>المحاسبة</a>
-      <a class="nav-item" data-route="documents"><span class="icon">📄</span>المستندات</a>
-      <a class="nav-item" data-route="reports"><span class="icon">📈</span>التقارير</a>
-      <a class="nav-item" data-route="data-quality"><span class="icon">✅</span>جودة البيانات</a>
-      <a class="nav-item" data-route="notifications"><span class="icon">🔔</span>التنبيهات<span id="nav-notif-badge" class="nav-badge" style="display:none">0</span></a>
-      <div class="nav-divider"></div>
-      <a class="nav-item" data-route="settings"><span class="icon">⚙️</span>الإعدادات</a>
+      <a class="nav-item" data-route="settings"><span class="icon">⚙️</span><span class="nav-label">الإعدادات</span></a>
     </nav>
   </aside>
 
   <!-- MAIN CONTENT -->
   <main class="main-content">
-    <!-- Header -->
+
+    <!-- ===== HEADER ===== -->
     <header class="header">
+      <!-- Right: hamburger + logo -->
       <div class="header-right">
-        <button class="hamburger" id="hamburger">☰</button>
-        <h1 class="page-title" id="page-title">لوحة التحكم</h1>
-      </div>
-      <div class="header-left">
-        <div class="header-search">
-          <input type="text" id="global-search" placeholder="بحث بالاسم أو الكود أو الجوال...">
-          <span class="search-icon">🔍</span>
+        <button class="hamburger" id="hamburger" title="طي القائمة">
+          <span></span><span></span><span></span>
+        </button>
+        <div class="header-brand">
+          <img src="assets/logo.png" alt="الماسي" class="header-logo-img">
+          <div class="header-brand-text">
+            <span class="header-brand-name">التنظيف الماسي</span>
+            <span class="header-brand-sub">نظام الإدارة</span>
+          </div>
         </div>
-        <!-- Smart Bell -->
+      </div>
+
+      <!-- Left: theme toggle + bell + avatar -->
+      <div class="header-left">
+        <!-- Dark/Light Toggle -->
+        <div class="theme-toggle-wrap" title="تبديل الوضع">
+          <span class="theme-icon theme-icon-moon">🌙</span>
+          <label class="theme-switch">
+            <input type="checkbox" id="theme-toggle-input" onchange="toggleTheme(this.checked)">
+            <span class="theme-slider"></span>
+          </label>
+          <span class="theme-icon theme-icon-sun">☀️</span>
+        </div>
+
+        <!-- Notification Bell -->
         <div class="notif-bell-wrapper">
           <button class="notif-btn" onclick="toggleNotifDropdown()">
             🔔<span class="notif-badge" id="notif-badge" style="display:none">0</span>
@@ -102,10 +130,19 @@
             <div class="notif-empty"><div style="font-size:2rem">🔔</div><div>جاري التحميل...</div></div>
           </div>
         </div>
+
         <!-- Connection Status -->
         <span id="connection-status" title="جاري الاتصال..." style="font-size:1.1rem;cursor:default">⏳</span>
+
+        <!-- User Avatar -->
+        <div class="header-avatar">عم</div>
       </div>
     </header>
+
+    <!-- Page title bar -->
+    <div class="page-title-bar">
+      <h1 class="page-title" id="page-title">لوحة التحكم</h1>
+    </div>
 
     <!-- Page Content -->
     <div class="page-content">

@@ -60,17 +60,38 @@ function initRouter() {
 
 // ===== SIDEBAR =====
 function toggleSidebar() {
-  const sidebar = document.querySelector('.sidebar');
-  const overlay = document.querySelector('.sidebar-overlay');
-  sidebar.classList.toggle('open');
-  overlay.classList.toggle('show');
+  const wrapper = document.getElementById('app-wrapper');
+  const sidebar  = document.getElementById('main-sidebar');
+  const overlay  = document.querySelector('.sidebar-overlay');
+
+  if (window.innerWidth <= 768) {
+    // Mobile: slide in/out
+    sidebar?.classList.toggle('open');
+    overlay?.classList.toggle('show');
+  } else {
+    // Desktop: collapse/expand
+    wrapper?.classList.toggle('sidebar-collapsed');
+  }
 }
 
 function closeSidebar() {
-  const sidebar = document.querySelector('.sidebar');
-  const overlay = document.querySelector('.sidebar-overlay');
+  const sidebar  = document.getElementById('main-sidebar');
+  const overlay  = document.querySelector('.sidebar-overlay');
   if (sidebar) sidebar.classList.remove('open');
   if (overlay) overlay.classList.remove('show');
+}
+
+// ===== THEME =====
+function toggleTheme(isLight) {
+  const wrapper = document.getElementById('app-wrapper');
+  if (!wrapper) return;
+  if (isLight) {
+    wrapper.classList.add('light');
+  } else {
+    wrapper.classList.remove('light');
+  }
+  // حفظ في STATE بدون localStorage
+  if (window.STATE) window.STATE.lightMode = isLight;
 }
 
 // ===== TOAST =====
