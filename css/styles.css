@@ -30,6 +30,24 @@
   --transition: 0.3s cubic-bezier(0.4,0,0.2,1);
 }
 
+/* ── ربط المتغيرات القديمة بالثيم الجديد (داكن افتراضي) ── */
+#app-wrapper {
+  --white:          rgba(255,255,255,.06);
+  --bg-card:        rgba(255,255,255,.06);
+  --text:           #ffffff;
+  --text-secondary: rgba(255,255,255,.45);
+  --border:         rgba(255,255,255,.1);
+}
+/* الوضع الفاتح — استعادة القيم الأصلية */
+#app-wrapper.light {
+  --white:          #ffffff;
+  --bg-card:        #ffffff;
+  --text:           #1B2754;
+  --text-secondary: #64748b;
+  --border:         #e2e8f0;
+}
+
+
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 html { font-size: 16px; scroll-behavior: smooth; }
@@ -1086,3 +1104,216 @@ tr.row-due-soon > td { background: rgba(245,158,11,0.03) !important; }
   .hamburger { display: flex; }
   .header-brand-name, .header-brand-sub { display: none; }
 }
+
+/* ================================================================
+   DARK MODE FIX — إصلاح شامل للألوان الثابتة
+   ================================================================ */
+
+/* ── نصوص كحلية ثابتة → var(--text) ── */
+#app-wrapper .card-title,
+#app-wrapper .kpi-value,
+#app-wrapper .tech-name,
+#app-wrapper .modal-title,
+#app-wrapper .notif-card-name,
+#app-wrapper .ns-val,
+#app-wrapper .acc-alert-num,
+#app-wrapper .acc-wo-type,
+#app-wrapper .acc-wo-amount,
+#app-wrapper .acc-bank-name,
+#app-wrapper .pay-history-amount,
+#app-wrapper .next-due-cell .due-amount,
+#app-wrapper .contract-val .cv-amount,
+#app-wrapper .cv-amount,
+#app-wrapper .welcome-content h2,
+#app-wrapper .welcome-stat .val,
+#app-wrapper .notif-dd-header,
+#app-wrapper .collection-summary strong {
+  color: var(--text) !important;
+}
+
+/* ── نصوص ثانوية → var(--text-dim) ── */
+#app-wrapper .kpi-label,
+#app-wrapper .kpi-change,
+#app-wrapper .tech-stat,
+#app-wrapper .form-label,
+#app-wrapper .acc-wo-ref,
+#app-wrapper .acc-wo-date,
+#app-wrapper .acc-wo-meta,
+#app-wrapper .acc-proj-ref,
+#app-wrapper .acc-bank-iban,
+#app-wrapper .pay-history-date,
+#app-wrapper .pay-history-receiver,
+#app-wrapper .next-due-cell .due-date,
+#app-wrapper .contract-val .cv-duration,
+#app-wrapper .paid-cell .pc-pct,
+#app-wrapper .ns-lbl,
+#app-wrapper .notif-dd-meta span,
+#app-wrapper .notif-dd-text,
+#app-wrapper .notif-mark-all,
+#app-wrapper .modal-close,
+#app-wrapper .empty-state h3,
+#app-wrapper td,
+#app-wrapper .table-wrapper td,
+#app-wrapper .collection-summary {
+  color: var(--text-dim) !important;
+}
+
+/* ── خلفيات ثابتة → var(--surface) ── */
+#app-wrapper .card,
+#app-wrapper .kpi-card,
+#app-wrapper .tech-card,
+#app-wrapper .chart-card,
+#app-wrapper .acc-wo-card,
+#app-wrapper .acc-proj-card,
+#app-wrapper .acc-bank-card,
+#app-wrapper .acc-alert-card,
+#app-wrapper .notif-card,
+#app-wrapper .pay-history-card,
+#app-wrapper .filter-bar,
+#app-wrapper .notif-dropdown {
+  background: var(--surface) !important;
+  border-color: var(--surface-border) !important;
+  color: var(--text) !important;
+}
+
+/* ── المودالز ── */
+#app-wrapper .modal-overlay .modal {
+  background: var(--bg2) !important;
+  color: var(--text) !important;
+  border: 1px solid var(--surface-border) !important;
+}
+#app-wrapper .modal-header {
+  border-bottom-color: var(--surface-border) !important;
+  background: var(--bg2) !important;
+}
+#app-wrapper .modal-footer {
+  border-top-color: var(--surface-border) !important;
+  background: var(--bg2) !important;
+}
+#app-wrapper .modal-body {
+  background: var(--bg2) !important;
+  color: var(--text) !important;
+}
+#app-wrapper .modal-title { color: var(--text) !important; }
+#app-wrapper .modal-close { color: var(--text-dim) !important; }
+
+/* ── حقول الإدخال ── */
+#app-wrapper .form-input,
+#app-wrapper .form-select,
+#app-wrapper .form-textarea {
+  background: var(--surface) !important;
+  border-color: var(--surface-border) !important;
+  color: var(--text) !important;
+}
+#app-wrapper .form-input::placeholder { color: var(--text-dim) !important; }
+#app-wrapper .form-label { color: var(--text) !important; }
+
+/* ── الجداول ── */
+#app-wrapper table { color: var(--text) !important; }
+#app-wrapper th { color: rgba(255,255,255,.85) !important; }
+#app-wrapper .table-wrapper th {
+  background: var(--surface) !important;
+  color: var(--text-dim) !important;
+  border-bottom-color: var(--surface-border) !important;
+}
+#app-wrapper td { border-bottom-color: var(--surface-border) !important; }
+#app-wrapper tbody tr:hover td { background: rgba(157,212,224,.05) !important; }
+
+/* كود العميل في جدول العملاء */
+#app-wrapper td strong[style*="color:var(--navy)"],
+#app-wrapper td strong { color: var(--text) !important; }
+
+/* ── التبويبات ── */
+#app-wrapper .tabs { border-bottom-color: var(--surface-border) !important; }
+#app-wrapper .tab { color: var(--text-dim) !important; }
+#app-wrapper .tab:hover { color: var(--text) !important; }
+#app-wrapper .tab.active { color: var(--orange) !important; border-bottom-color: var(--orange) !important; }
+
+/* ── filter-bar داخل المودال ── */
+#app-wrapper .collection-summary {
+  background: var(--surface) !important;
+  border-color: var(--surface-border) !important;
+}
+
+/* ── أقسام التقارير والإعدادات ── */
+#app-wrapper .settings-grid .setting-item {
+  background: var(--surface) !important;
+  border: 1px solid var(--surface-border) !important;
+  color: var(--text) !important;
+}
+#app-wrapper .welcome-content { color: var(--text) !important; }
+#app-wrapper .welcome-stat {
+  background: var(--surface) !important;
+  border: 1px solid var(--surface-border) !important;
+}
+#app-wrapper .welcome-stat .lbl { color: var(--text-dim) !important; }
+
+/* ── الأكورديون والتفاصيل في المحاسبة ── */
+#app-wrapper .acc-phase { background: var(--surface) !important; color: var(--text) !important; }
+#app-wrapper .acc-phase.paid   { background: rgba(16,185,129,.12) !important; }
+#app-wrapper .acc-phase.late   { background: rgba(239,68,68,.12) !important; }
+#app-wrapper .acc-phase.pending{ background: rgba(245,158,11,.1) !important; }
+
+/* ── باقة التنبيهات ── */
+#app-wrapper .notif-card-stats { background: var(--surface) !important; border-color: var(--surface-border) !important; }
+#app-wrapper .notif-stat { border-color: var(--surface-border) !important; }
+#app-wrapper .notif-card-header { border-color: var(--surface-border) !important; }
+#app-wrapper .notif-card-actions { background: var(--bg) !important; }
+#app-wrapper .notif-reminder-log { background: var(--surface) !important; border-color: var(--surface-border) !important; }
+#app-wrapper .notif-log-item { background: var(--bg) !important; border-color: var(--surface-border) !important; color: var(--text-dim) !important; }
+
+/* ── أزرار في الوضع الداكن — outline ── */
+#app-wrapper .btn-outline {
+  color: var(--text) !important;
+  border-color: var(--surface-border) !important;
+}
+#app-wrapper .btn-outline:hover {
+  background: var(--surface) !important;
+  border-color: var(--cyan) !important;
+}
+
+/* ── حاوية day-checkboxes ── */
+#app-wrapper .day-check {
+  border-color: var(--surface-border) !important;
+  color: var(--text) !important;
+}
+#app-wrapper .day-check:hover { border-color: var(--cyan) !important; }
+
+/* ── receipt upload area ── */
+#app-wrapper .receipt-upload-area {
+  background: var(--surface) !important;
+  border-color: var(--surface-border) !important;
+}
+#app-wrapper .receipt-upload-placeholder p { color: var(--text-dim) !important; }
+
+/* ── كروت العمل (work orders) داخل المحاسبة ── */
+#app-wrapper .acc-wo-desc { color: var(--text) !important; }
+
+/* ── الوضع الفاتح: استعادة نصوص كحلية للعناصر المميزة ── */
+#app-wrapper.light .card-title,
+#app-wrapper.light .kpi-value,
+#app-wrapper.light .tech-name,
+#app-wrapper.light .modal-title,
+#app-wrapper.light .acc-alert-num,
+#app-wrapper.light .acc-wo-amount,
+#app-wrapper.light .next-due-cell .due-amount,
+#app-wrapper.light .contract-val .cv-amount,
+#app-wrapper.light .ns-val,
+#app-wrapper.light .pay-history-amount {
+  color: var(--navy) !important;
+}
+#app-wrapper.light td strong { color: var(--navy) !important; }
+#app-wrapper.light .modal-overlay .modal { background: #ffffff !important; }
+#app-wrapper.light .modal-header,
+#app-wrapper.light .modal-body,
+#app-wrapper.light .modal-footer { background: #ffffff !important; }
+#app-wrapper.light .form-input,
+#app-wrapper.light .form-select,
+#app-wrapper.light .form-textarea {
+  background: #ffffff !important;
+  border-color: #e2e8f0 !important;
+  color: #1B2754 !important;
+}
+#app-wrapper.light .filter-bar { background: #ffffff !important; border-color: #e2e8f0 !important; }
+#app-wrapper.light .acc-phase { background: #f1f5f9 !important; }
+#app-wrapper.light .notif-card-stats { background: #f8fafc !important; }
