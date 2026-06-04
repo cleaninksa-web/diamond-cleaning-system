@@ -6,21 +6,24 @@ function initSplash() {
   const splash = document.getElementById('splash-screen');
   if (!splash) return;
 
-  // Check if splash should show
+  // هل يُعرض السبلاش؟
   const showSplash = localStorage.getItem('dc_show_splash') !== 'false';
-  if (!showSplash) {
-    splash.remove();
-    return;
-  }
+  if (!showSplash) { splash.remove(); return; }
 
-  // Skip button
+  // زر التخطي
   const skipBtn = splash.querySelector('.splash-skip');
-  if (skipBtn) {
-    skipBtn.addEventListener('click', () => closeSplash());
-  }
+  if (skipBtn) skipBtn.addEventListener('click', () => closeSplash());
 
-  // Auto close after 3 seconds
-  setTimeout(() => closeSplash(), 3000);
+  // أغلق تلقائياً عند انتهاء الفيديو
+  const video = document.getElementById('splash-video');
+  if (video) {
+    video.addEventListener('ended', () => closeSplash());
+    // حد أقصى 10 ثواني لو الفيديو ما اشتغل
+    setTimeout(() => closeSplash(), 10000);
+  } else {
+    // fallback: 3 ثواني بدون فيديو
+    setTimeout(() => closeSplash(), 3000);
+  }
 }
 
 function closeSplash() {

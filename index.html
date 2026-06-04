@@ -17,13 +17,13 @@
 
 <!-- ===== SPLASH SCREEN ===== -->
 <div id="splash-screen">
-  <div class="bubble"></div><div class="bubble"></div><div class="bubble"></div>
-  <div class="bubble"></div><div class="bubble"></div>
-  <div class="splash-logo-wrapper">
-    <img src="assets/logo.png" alt="التنظيف الماسي" class="splash-logo-img">
+  <video id="splash-video" autoplay muted playsinline
+         style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;">
+    <source src="assets/splash-video.mp4" type="video/mp4">
+  </video>
+  <div style="position:absolute;inset:0;z-index:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding-bottom:40px;">
+    <button class="splash-skip" onclick="closeSplash()" style="z-index:2;">تخطي ←</button>
   </div>
-  <div class="splash-progress"><div class="splash-progress-bar"></div></div>
-  <button class="splash-skip" onclick="closeSplash()">تخطي ←</button>
 </div>
 
 <!-- ===== TOAST CONTAINER ===== -->
