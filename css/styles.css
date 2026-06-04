@@ -31,15 +31,15 @@
 }
 
 /* ── ربط المتغيرات القديمة بالثيم الجديد (داكن افتراضي) ── */
-#app-wrapper {
-  --white:          rgba(255,255,255,.06);
+body {
+  --white:          #ffffff;
   --bg-card:        rgba(255,255,255,.06);
   --text:           #ffffff;
-  --text-secondary: rgba(255,255,255,.45);
-  --border:         rgba(255,255,255,.1);
+  --text-secondary: rgba(255,255,255,.65);
+  --border:         rgba(255,255,255,.15);
 }
 /* الوضع الفاتح — استعادة القيم الأصلية */
-#app-wrapper.light {
+body.light {
   --white:          #ffffff;
   --bg-card:        #ffffff;
   --text:           #1B2754;
@@ -855,13 +855,13 @@ tr.row-due-soon > td { background: rgba(245,158,11,0.03) !important; }
    ================================================================ */
 
 /* ── CSS Variables — Dark Mode (default) ── */
-#app-wrapper {
+body {
   --bg:             #060d1f;
   --bg2:            #0a1428;
   --surface:        rgba(255,255,255,.04);
   --surface-border: rgba(255,255,255,.08);
   --text:           #ffffff;
-  --text-dim:       rgba(255,255,255,.45);
+  --text-dim:       rgba(255,255,255,.65);
   --side-bg:        rgba(255,255,255,.02);
   --sidebar-w:      185px;
   --header-h:       60px;
@@ -869,7 +869,7 @@ tr.row-due-soon > td { background: rgba(245,158,11,0.03) !important; }
 }
 
 /* ── Light Mode ── */
-#app-wrapper.light {
+body.light {
   --bg:             #eef2f7;
   --bg2:            #f7f9fc;
   --surface:        #ffffff;
@@ -880,7 +880,7 @@ tr.row-due-soon > td { background: rgba(245,158,11,0.03) !important; }
 }
 
 /* Override body bg with theme */
-#app-wrapper { background: var(--bg); min-height: 100vh; transition: background var(--shell-transition), color var(--shell-transition); }
+body { background: var(--bg); min-height: 100vh; transition: background var(--shell-transition), color var(--shell-transition); }
 
 /* ── Sidebar ── */
 #main-sidebar {
@@ -894,10 +894,10 @@ tr.row-due-soon > td { background: rgba(245,158,11,0.03) !important; }
 }
 
 /* Collapsed sidebar */
-#app-wrapper.sidebar-collapsed #main-sidebar {
+body.sidebar-collapsed #main-sidebar {
   width: 0;
 }
-#app-wrapper.sidebar-collapsed .main-content {
+body.sidebar-collapsed .main-content {
   margin-right: 0;
   max-width: 100vw;
 }
@@ -937,7 +937,7 @@ tr.row-due-soon > td { background: rgba(245,158,11,0.03) !important; }
   border-right-color: #9DD4E0; font-weight: 700;
 }
 /* In light mode: active item gets orange right border */
-#app-wrapper.light .nav-item.active { border-right-color: #F39237; color: #fff; }
+body.light .nav-item.active { border-right-color: #F39237; color: #fff; }
 .nav-item .icon { font-size: 1.05rem; width: 22px; text-align: center; flex-shrink: 0; }
 .nav-label { flex: 1; overflow: hidden; text-overflow: ellipsis; }
 .nav-divider { height: 1px; background: rgba(255,255,255,.07); margin: 6px 14px; }
@@ -1033,73 +1033,73 @@ tr.row-due-soon > td { background: rgba(245,158,11,0.03) !important; }
 }
 
 /* ── Cards + Components adapt to theme ── */
-#app-wrapper.light .card,
-#app-wrapper.light .kpi-card,
-#app-wrapper.light .tech-card,
-#app-wrapper.light .chart-card,
-#app-wrapper.light .filter-bar,
-#app-wrapper.light .acc-wo-card,
-#app-wrapper.light .acc-proj-card,
-#app-wrapper.light .acc-bank-card,
-#app-wrapper.light .acc-alert-card,
-#app-wrapper.light .notif-dropdown,
-#app-wrapper.light .modal,
-#app-wrapper.light .notif-card {
+body.light .card,
+body.light .kpi-card,
+body.light .tech-card,
+body.light .chart-card,
+body.light .filter-bar,
+body.light .acc-wo-card,
+body.light .acc-proj-card,
+body.light .acc-bank-card,
+body.light .acc-alert-card,
+body.light .notif-dropdown,
+body.light .modal,
+body.light .notif-card {
   background: var(--surface);
   color: var(--text);
 }
-#app-wrapper .card,
-#app-wrapper .kpi-card,
-#app-wrapper .tech-card,
-#app-wrapper .chart-card {
+body .card,
+body .kpi-card,
+body .tech-card,
+body .chart-card {
   background: var(--surface);
   border: 1px solid var(--surface-border);
   color: var(--text);
   transition: background var(--shell-transition), border-color var(--shell-transition);
 }
-#app-wrapper .card-title,
-#app-wrapper .kpi-value,
-#app-wrapper .tech-name,
-#app-wrapper .page-title,
-#app-wrapper .modal-title {
+body .card-title,
+body .kpi-value,
+body .tech-name,
+body .page-title,
+body .modal-title {
   color: var(--text);
   transition: color var(--shell-transition);
 }
-#app-wrapper .kpi-label,
-#app-wrapper .tech-stat,
-#app-wrapper .text-secondary,
-#app-wrapper .form-label {
+body .kpi-label,
+body .tech-stat,
+body .text-secondary,
+body .form-label {
   color: var(--text-dim);
   transition: color var(--shell-transition);
 }
-#app-wrapper .form-input,
-#app-wrapper .form-select,
-#app-wrapper .form-textarea {
+body .form-input,
+body .form-select,
+body .form-textarea {
   background: var(--surface);
   border-color: var(--surface-border);
   color: var(--text);
   transition: background var(--shell-transition), border-color var(--shell-transition), color var(--shell-transition);
 }
-#app-wrapper .filter-bar {
+body .filter-bar {
   background: var(--surface);
   border: 1px solid var(--surface-border);
   transition: background var(--shell-transition);
 }
-#app-wrapper table thead { background: rgba(27,39,84,.6); }
-#app-wrapper.light table thead { background: #1B2754; }
-#app-wrapper td { border-bottom-color: var(--surface-border); color: var(--text); }
-#app-wrapper .table-wrapper th { background: var(--surface); color: var(--text-dim); border-bottom-color: var(--surface-border); }
-#app-wrapper .tabs { border-bottom-color: var(--surface-border); }
-#app-wrapper .tab { color: var(--text-dim); }
-#app-wrapper .tab.active { color: #F39237; border-bottom-color: #F39237; }
-#app-wrapper .modal { background: var(--bg2); border: 1px solid var(--surface-border); }
-#app-wrapper .modal-header, #app-wrapper .modal-footer { border-color: var(--surface-border); }
+body table thead { background: rgba(27,39,84,.6); }
+body.light table thead { background: #1B2754; }
+body td { border-bottom-color: var(--surface-border); color: var(--text); }
+body .table-wrapper th { background: var(--surface); color: var(--text-dim); border-bottom-color: var(--surface-border); }
+body .tabs { border-bottom-color: var(--surface-border); }
+body .tab { color: var(--text-dim); }
+body .tab.active { color: #F39237; border-bottom-color: #F39237; }
+body .modal { background: var(--bg2); border: 1px solid var(--surface-border); }
+body .modal-header, body .modal-footer { border-color: var(--surface-border); }
 
 /* ── Responsive Shell ── */
 @media (max-width: 768px) {
   #main-sidebar { transform: translateX(100%); width: var(--sidebar-w) !important; }
   #main-sidebar.open { transform: translateX(0); }
-  #app-wrapper.sidebar-collapsed #main-sidebar { transform: translateX(100%); }
+  body.sidebar-collapsed #main-sidebar { transform: translateX(100%); }
   .main-content { margin-right: 0 !important; max-width: 100vw !important; }
   .hamburger { display: flex; }
   .header-brand-name, .header-brand-sub { display: none; }
@@ -1110,210 +1110,210 @@ tr.row-due-soon > td { background: rgba(245,158,11,0.03) !important; }
    ================================================================ */
 
 /* ── نصوص كحلية ثابتة → var(--text) ── */
-#app-wrapper .card-title,
-#app-wrapper .kpi-value,
-#app-wrapper .tech-name,
-#app-wrapper .modal-title,
-#app-wrapper .notif-card-name,
-#app-wrapper .ns-val,
-#app-wrapper .acc-alert-num,
-#app-wrapper .acc-wo-type,
-#app-wrapper .acc-wo-amount,
-#app-wrapper .acc-bank-name,
-#app-wrapper .pay-history-amount,
-#app-wrapper .next-due-cell .due-amount,
-#app-wrapper .contract-val .cv-amount,
-#app-wrapper .cv-amount,
-#app-wrapper .welcome-content h2,
-#app-wrapper .welcome-stat .val,
-#app-wrapper .notif-dd-header,
-#app-wrapper .collection-summary strong {
+body .card-title,
+body .kpi-value,
+body .tech-name,
+body .modal-title,
+body .notif-card-name,
+body .ns-val,
+body .acc-alert-num,
+body .acc-wo-type,
+body .acc-wo-amount,
+body .acc-bank-name,
+body .pay-history-amount,
+body .next-due-cell .due-amount,
+body .contract-val .cv-amount,
+body .cv-amount,
+body .welcome-content h2,
+body .welcome-stat .val,
+body .notif-dd-header,
+body .collection-summary strong {
   color: var(--text) !important;
 }
 
 /* ── نصوص ثانوية → var(--text-dim) ── */
-#app-wrapper .kpi-label,
-#app-wrapper .kpi-change,
-#app-wrapper .tech-stat,
-#app-wrapper .form-label,
-#app-wrapper .acc-wo-ref,
-#app-wrapper .acc-wo-date,
-#app-wrapper .acc-wo-meta,
-#app-wrapper .acc-proj-ref,
-#app-wrapper .acc-bank-iban,
-#app-wrapper .pay-history-date,
-#app-wrapper .pay-history-receiver,
-#app-wrapper .next-due-cell .due-date,
-#app-wrapper .contract-val .cv-duration,
-#app-wrapper .paid-cell .pc-pct,
-#app-wrapper .ns-lbl,
-#app-wrapper .notif-dd-meta span,
-#app-wrapper .notif-dd-text,
-#app-wrapper .notif-mark-all,
-#app-wrapper .modal-close,
-#app-wrapper .empty-state h3,
-#app-wrapper td,
-#app-wrapper .table-wrapper td,
-#app-wrapper .collection-summary {
+body .kpi-label,
+body .kpi-change,
+body .tech-stat,
+body .form-label,
+body .acc-wo-ref,
+body .acc-wo-date,
+body .acc-wo-meta,
+body .acc-proj-ref,
+body .acc-bank-iban,
+body .pay-history-date,
+body .pay-history-receiver,
+body .next-due-cell .due-date,
+body .contract-val .cv-duration,
+body .paid-cell .pc-pct,
+body .ns-lbl,
+body .notif-dd-meta span,
+body .notif-dd-text,
+body .notif-mark-all,
+body .modal-close,
+body .empty-state h3,
+body td,
+body .table-wrapper td,
+body .collection-summary {
   color: var(--text-dim) !important;
 }
 
 /* ── خلفيات ثابتة → var(--surface) ── */
-#app-wrapper .card,
-#app-wrapper .kpi-card,
-#app-wrapper .tech-card,
-#app-wrapper .chart-card,
-#app-wrapper .acc-wo-card,
-#app-wrapper .acc-proj-card,
-#app-wrapper .acc-bank-card,
-#app-wrapper .acc-alert-card,
-#app-wrapper .notif-card,
-#app-wrapper .pay-history-card,
-#app-wrapper .filter-bar,
-#app-wrapper .notif-dropdown {
+body .card,
+body .kpi-card,
+body .tech-card,
+body .chart-card,
+body .acc-wo-card,
+body .acc-proj-card,
+body .acc-bank-card,
+body .acc-alert-card,
+body .notif-card,
+body .pay-history-card,
+body .filter-bar,
+body .notif-dropdown {
   background: var(--surface) !important;
   border-color: var(--surface-border) !important;
   color: var(--text) !important;
 }
 
 /* ── المودالز ── */
-#app-wrapper .modal-overlay .modal {
+body .modal-overlay .modal {
   background: var(--bg2) !important;
   color: var(--text) !important;
   border: 1px solid var(--surface-border) !important;
 }
-#app-wrapper .modal-header {
+body .modal-header {
   border-bottom-color: var(--surface-border) !important;
   background: var(--bg2) !important;
 }
-#app-wrapper .modal-footer {
+body .modal-footer {
   border-top-color: var(--surface-border) !important;
   background: var(--bg2) !important;
 }
-#app-wrapper .modal-body {
+body .modal-body {
   background: var(--bg2) !important;
   color: var(--text) !important;
 }
-#app-wrapper .modal-title { color: var(--text) !important; }
-#app-wrapper .modal-close { color: var(--text-dim) !important; }
+body .modal-title { color: var(--text) !important; }
+body .modal-close { color: var(--text-dim) !important; }
 
 /* ── حقول الإدخال ── */
-#app-wrapper .form-input,
-#app-wrapper .form-select,
-#app-wrapper .form-textarea {
+body .form-input,
+body .form-select,
+body .form-textarea {
   background: var(--surface) !important;
   border-color: var(--surface-border) !important;
   color: var(--text) !important;
 }
-#app-wrapper .form-input::placeholder { color: var(--text-dim) !important; }
-#app-wrapper .form-label { color: var(--text) !important; }
+body .form-input::placeholder { color: var(--text-dim) !important; }
+body .form-label { color: var(--text) !important; }
 
 /* ── الجداول ── */
-#app-wrapper table { color: var(--text) !important; }
-#app-wrapper th { color: rgba(255,255,255,.85) !important; }
-#app-wrapper .table-wrapper th {
+body table { color: var(--text) !important; }
+body th { color: rgba(255,255,255,.85) !important; }
+body .table-wrapper th {
   background: var(--surface) !important;
   color: var(--text-dim) !important;
   border-bottom-color: var(--surface-border) !important;
 }
-#app-wrapper td { border-bottom-color: var(--surface-border) !important; }
-#app-wrapper tbody tr:hover td { background: rgba(157,212,224,.05) !important; }
+body td { border-bottom-color: var(--surface-border) !important; }
+body tbody tr:hover td { background: rgba(157,212,224,.05) !important; }
 
 /* كود العميل في جدول العملاء */
-#app-wrapper td strong[style*="color:var(--navy)"],
-#app-wrapper td strong { color: var(--text) !important; }
+body td strong[style*="color:var(--navy)"],
+body td strong { color: var(--text) !important; }
 
 /* ── التبويبات ── */
-#app-wrapper .tabs { border-bottom-color: var(--surface-border) !important; }
-#app-wrapper .tab { color: var(--text-dim) !important; }
-#app-wrapper .tab:hover { color: var(--text) !important; }
-#app-wrapper .tab.active { color: var(--orange) !important; border-bottom-color: var(--orange) !important; }
+body .tabs { border-bottom-color: var(--surface-border) !important; }
+body .tab { color: var(--text-dim) !important; }
+body .tab:hover { color: var(--text) !important; }
+body .tab.active { color: var(--orange) !important; border-bottom-color: var(--orange) !important; }
 
 /* ── filter-bar داخل المودال ── */
-#app-wrapper .collection-summary {
+body .collection-summary {
   background: var(--surface) !important;
   border-color: var(--surface-border) !important;
 }
 
 /* ── أقسام التقارير والإعدادات ── */
-#app-wrapper .settings-grid .setting-item {
+body .settings-grid .setting-item {
   background: var(--surface) !important;
   border: 1px solid var(--surface-border) !important;
   color: var(--text) !important;
 }
-#app-wrapper .welcome-content { color: var(--text) !important; }
-#app-wrapper .welcome-stat {
+body .welcome-content { color: var(--text) !important; }
+body .welcome-stat {
   background: var(--surface) !important;
   border: 1px solid var(--surface-border) !important;
 }
-#app-wrapper .welcome-stat .lbl { color: var(--text-dim) !important; }
+body .welcome-stat .lbl { color: var(--text-dim) !important; }
 
 /* ── الأكورديون والتفاصيل في المحاسبة ── */
-#app-wrapper .acc-phase { background: var(--surface) !important; color: var(--text) !important; }
-#app-wrapper .acc-phase.paid   { background: rgba(16,185,129,.12) !important; }
-#app-wrapper .acc-phase.late   { background: rgba(239,68,68,.12) !important; }
-#app-wrapper .acc-phase.pending{ background: rgba(245,158,11,.1) !important; }
+body .acc-phase { background: var(--surface) !important; color: var(--text) !important; }
+body .acc-phase.paid   { background: rgba(16,185,129,.12) !important; }
+body .acc-phase.late   { background: rgba(239,68,68,.12) !important; }
+body .acc-phase.pending{ background: rgba(245,158,11,.1) !important; }
 
 /* ── باقة التنبيهات ── */
-#app-wrapper .notif-card-stats { background: var(--surface) !important; border-color: var(--surface-border) !important; }
-#app-wrapper .notif-stat { border-color: var(--surface-border) !important; }
-#app-wrapper .notif-card-header { border-color: var(--surface-border) !important; }
-#app-wrapper .notif-card-actions { background: var(--bg) !important; }
-#app-wrapper .notif-reminder-log { background: var(--surface) !important; border-color: var(--surface-border) !important; }
-#app-wrapper .notif-log-item { background: var(--bg) !important; border-color: var(--surface-border) !important; color: var(--text-dim) !important; }
+body .notif-card-stats { background: var(--surface) !important; border-color: var(--surface-border) !important; }
+body .notif-stat { border-color: var(--surface-border) !important; }
+body .notif-card-header { border-color: var(--surface-border) !important; }
+body .notif-card-actions { background: var(--bg) !important; }
+body .notif-reminder-log { background: var(--surface) !important; border-color: var(--surface-border) !important; }
+body .notif-log-item { background: var(--bg) !important; border-color: var(--surface-border) !important; color: var(--text-dim) !important; }
 
 /* ── أزرار في الوضع الداكن — outline ── */
-#app-wrapper .btn-outline {
+body .btn-outline {
   color: var(--text) !important;
   border-color: var(--surface-border) !important;
 }
-#app-wrapper .btn-outline:hover {
+body .btn-outline:hover {
   background: var(--surface) !important;
   border-color: var(--cyan) !important;
 }
 
 /* ── حاوية day-checkboxes ── */
-#app-wrapper .day-check {
+body .day-check {
   border-color: var(--surface-border) !important;
   color: var(--text) !important;
 }
-#app-wrapper .day-check:hover { border-color: var(--cyan) !important; }
+body .day-check:hover { border-color: var(--cyan) !important; }
 
 /* ── receipt upload area ── */
-#app-wrapper .receipt-upload-area {
+body .receipt-upload-area {
   background: var(--surface) !important;
   border-color: var(--surface-border) !important;
 }
-#app-wrapper .receipt-upload-placeholder p { color: var(--text-dim) !important; }
+body .receipt-upload-placeholder p { color: var(--text-dim) !important; }
 
 /* ── كروت العمل (work orders) داخل المحاسبة ── */
-#app-wrapper .acc-wo-desc { color: var(--text) !important; }
+body .acc-wo-desc { color: var(--text) !important; }
 
 /* ── الوضع الفاتح: استعادة نصوص كحلية للعناصر المميزة ── */
-#app-wrapper.light .card-title,
-#app-wrapper.light .kpi-value,
-#app-wrapper.light .tech-name,
-#app-wrapper.light .modal-title,
-#app-wrapper.light .acc-alert-num,
-#app-wrapper.light .acc-wo-amount,
-#app-wrapper.light .next-due-cell .due-amount,
-#app-wrapper.light .contract-val .cv-amount,
-#app-wrapper.light .ns-val,
-#app-wrapper.light .pay-history-amount {
+body.light .card-title,
+body.light .kpi-value,
+body.light .tech-name,
+body.light .modal-title,
+body.light .acc-alert-num,
+body.light .acc-wo-amount,
+body.light .next-due-cell .due-amount,
+body.light .contract-val .cv-amount,
+body.light .ns-val,
+body.light .pay-history-amount {
   color: var(--navy) !important;
 }
-#app-wrapper.light td strong { color: var(--navy) !important; }
-#app-wrapper.light .modal-overlay .modal { background: #ffffff !important; }
-#app-wrapper.light .modal-header,
-#app-wrapper.light .modal-body,
-#app-wrapper.light .modal-footer { background: #ffffff !important; }
-#app-wrapper.light .form-input,
-#app-wrapper.light .form-select,
-#app-wrapper.light .form-textarea {
+body.light td strong { color: var(--navy) !important; }
+body.light .modal-overlay .modal { background: #ffffff !important; }
+body.light .modal-header,
+body.light .modal-body,
+body.light .modal-footer { background: #ffffff !important; }
+body.light .form-input,
+body.light .form-select,
+body.light .form-textarea {
   background: #ffffff !important;
   border-color: #e2e8f0 !important;
   color: #1B2754 !important;
 }
-#app-wrapper.light .filter-bar { background: #ffffff !important; border-color: #e2e8f0 !important; }
-#app-wrapper.light .acc-phase { background: #f1f5f9 !important; }
-#app-wrapper.light .notif-card-stats { background: #f8fafc !important; }
+body.light .filter-bar { background: #ffffff !important; border-color: #e2e8f0 !important; }
+body.light .acc-phase { background: #f1f5f9 !important; }
+body.light .notif-card-stats { background: #f8fafc !important; }

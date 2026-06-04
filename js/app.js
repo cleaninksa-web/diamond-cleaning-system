@@ -83,12 +83,11 @@ function closeSidebar() {
 
 // ===== THEME =====
 function toggleTheme(isLight) {
-  const wrapper = document.getElementById('app-wrapper');
-  if (!wrapper) return;
+  const body = document.body;
   if (isLight) {
-    wrapper.classList.add('light');
+    body.classList.add('light');
   } else {
-    wrapper.classList.remove('light');
+    body.classList.remove('light');
   }
   // حفظ في STATE بدون localStorage
   if (window.STATE) window.STATE.lightMode = isLight;
