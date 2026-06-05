@@ -140,6 +140,11 @@ function viewCustomer(id) {
       <div><strong>نوع المسبح:</strong> ${c.pool_type || '-'}</div>
       <div><strong>الاشتراك الشهري:</strong> ${formatCurrency(c.monthly_subscription)}</div>
       <div><strong>زيارات أسبوعية:</strong> ${c.weekly_visits}</div>
+      ${(c.maps_url || (c.latitude && c.longitude)) ? `
+      <div style="grid-column: 1 / -1; background: var(--bg); padding: 12px; border-radius: var(--radius-sm); display: flex; align-items: center; gap: 12px; border: 1px solid var(--surface-border);">
+        ${c.maps_url ? `<a href="${c.maps_url}" target="_blank" class="btn btn-sm btn-cyan" style="text-decoration:none">📍 افتح الموقع</a>` : ''}
+        ${(c.latitude && c.longitude) ? `<span style="font-size: 0.85rem; color: var(--text-dim); direction: ltr;">${c.latitude}, ${c.longitude}</span>` : ''}
+      </div>` : ''}
     </div>
     ${contract ? `<hr style="margin:16px 0"><h4 style="color:var(--navy);margin-bottom:8px">📝 العقد النشط</h4>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:0.9rem">
@@ -180,6 +185,12 @@ function editCustomer(id) {
   if (fJob) fJob.value = c.job_title || '';
   const fHouse = document.getElementById('f-house-number');
   if (fHouse) fHouse.value = c.house_number || '';
+  const fMaps = document.getElementById('f-maps-url');
+  if (fMaps) fMaps.value = c.maps_url || '';
+  const fLat = document.getElementById('f-latitude');
+  if (fLat) fLat.value = c.latitude || '';
+  const fLng = document.getElementById('f-longitude');
+  if (fLng) fLng.value = c.longitude || '';
   // تعبئة أيام الزيارة
   const savedDays = c.visit_days ? c.visit_days.split(',') : [];
   document.querySelectorAll('#f-visit-days input[type="checkbox"]').forEach(cb => {
@@ -214,6 +225,9 @@ async function saveCustomer() {
     notes:                document.getElementById('f-notes')?.value || '',
     job_title:            document.getElementById('f-job-title')?.value?.trim() || null,
     house_number:         document.getElementById('f-house-number')?.value?.trim() || null,
+    maps_url:             document.getElementById('f-maps-url')?.value?.trim() || null,
+    latitude:             parseFloat(document.getElementById('f-latitude')?.value) || null,
+    longitude:            parseFloat(document.getElementById('f-longitude')?.value) || null,
     // أيام الزيارة من checkboxes
     visit_days: Array.from(document.querySelectorAll('#f-visit-days input[type="checkbox"]:checked'))
                      .map(cb => cb.value).join(',') || null,
