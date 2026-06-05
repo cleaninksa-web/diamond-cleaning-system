@@ -60,7 +60,6 @@ function initRouter() {
 
 // ===== SIDEBAR =====
 function toggleSidebar() {
-  const wrapper = document.getElementById('app-wrapper');
   const sidebar  = document.getElementById('main-sidebar');
   const overlay  = document.querySelector('.sidebar-overlay');
 
@@ -70,7 +69,7 @@ function toggleSidebar() {
     overlay?.classList.toggle('show');
   } else {
     // Desktop: collapse/expand
-    wrapper?.classList.toggle('sidebar-collapsed');
+    document.body.classList.toggle('sidebar-collapsed');
   }
 }
 
