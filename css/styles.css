@@ -32,6 +32,7 @@
 
 /* ── ربط المتغيرات القديمة بالثيم الجديد (داكن افتراضي) ── */
 body {
+  color-scheme: dark;
   --white:          #ffffff;
   --bg-card:        rgba(255,255,255,.06);
   --text:           #ffffff;
@@ -40,6 +41,7 @@ body {
 }
 /* الوضع الفاتح — استعادة القيم الأصلية */
 body.light {
+  color-scheme: light;
   --white:          #ffffff;
   --bg-card:        #ffffff;
   --text:           #1B2754;
@@ -1317,3 +1319,22 @@ body.light .form-textarea {
 body.light .filter-bar { background: #ffffff !important; border-color: #e2e8f0 !important; }
 body.light .acc-phase { background: #f1f5f9 !important; }
 body.light .notif-card-stats { background: #f8fafc !important; }
+
+/* ── إصلاح القوائم المنسدلة (Select / Options) ── */
+body select, body option {
+  background: var(--surface) !important;
+  color: var(--text) !important;
+}
+body select option {
+  background: var(--bg2) !important;
+  color: var(--text) !important;
+}
+
+body.light select, body.light option {
+  background: #ffffff !important;
+  color: #1B2754 !important;
+}
+body.light select option {
+  background: #ffffff !important;
+  color: #1B2754 !important;
+}
