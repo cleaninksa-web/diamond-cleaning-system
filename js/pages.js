@@ -517,7 +517,10 @@ function filterContracts() {
       <td>${formatDateShort(c.start_date)}</td>
       <td>${formatDateShort(c.end_date)}<br><small>${daysText}</small></td>
       <td>${statusBadge(c.status)}</td>
-      <td><button class="btn btn-sm btn-outline" onclick="showToast('عرض العقد ${c.reference_number}','info')">👁</button></td>
+      <td>
+        <button class="btn btn-sm btn-outline" onclick="editContract(${c.id})" title="تعديل">✏️</button>
+        <button class="btn btn-sm btn-outline" onclick="printContract(${c.id})" title="طباعة">🖨️</button>
+      </td>
     </tr>`;
   }).join('');
 }
