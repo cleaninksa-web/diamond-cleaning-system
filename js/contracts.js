@@ -52,10 +52,9 @@ function editContract(contractId) {
         <input class="form-input" type="number" id="ce-total" value="${contract.total_amount || 0}"></div>
       <div class="form-group"><label class="form-label">الحالة</label>
         <select class="form-select" id="ce-status">
-          <option value="active" ${contract.status === 'active' ? 'selected' : ''}>نشط</option>
           <option value="نشط" ${contract.status === 'نشط' ? 'selected' : ''}>نشط</option>
-          <option value="inactive" ${contract.status === 'inactive' ? 'selected' : ''}>منتهي</option>
           <option value="منتهي" ${contract.status === 'منتهي' ? 'selected' : ''}>منتهي</option>
+          <option value="ملغي" ${contract.status === 'ملغي' ? 'selected' : ''}>ملغي</option>
         </select></div>
     </div>
     <div class="form-group"><label class="form-label">طريقة الدفع</label>

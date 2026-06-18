@@ -268,11 +268,18 @@
       <section id="section-contracts" class="page-section">
         <div class="filter-bar">
           <input type="text" class="form-input" id="contract-search" placeholder="بحث بالعميل أو رقم العقد...">
-          <select class="form-select" id="filter-contract-status"><option value="">كل الحالات</option><option value="نشط">نشط</option><option value="منتهي">منتهي</option></select>
+          <select class="form-select" id="filter-contract-status"><option value="">كل الحالات</option><option value="نشط">نشط</option><option value="منتهي">منتهي</option><option value="ملغي">ملغي</option></select>
           <button class="btn btn-primary" onclick="openModal('contract-modal')">➕ عقد جديد</button>
+        </div>
+        <div class="kpi-grid" style="margin-bottom:16px">
+          <div class="kpi-card navy"><div class="kpi-icon">📋</div><div class="kpi-value" id="con-kpi-total">—</div><div class="kpi-label">إجمالي العقود</div></div>
+          <div class="kpi-card success"><div class="kpi-icon">✅</div><div class="kpi-value" id="con-kpi-active">—</div><div class="kpi-label">العقود النشطة</div></div>
+          <div class="kpi-card cyan"><div class="kpi-icon">💰</div><div class="kpi-value" id="con-kpi-value">—</div><div class="kpi-label">القيمة الإجمالية</div></div>
+          <div class="kpi-card orange"><div class="kpi-icon">⏰</div><div class="kpi-value" id="con-kpi-expiring">—</div><div class="kpi-label">تنتهي قريباً (30 يوم)</div></div>
         </div>
         <div class="card"><div class="table-wrapper"><table><thead><tr><th>الرقم المرجعي</th><th>العميل</th><th>المبلغ</th><th>البداية</th><th>النهاية</th><th>الحالة</th><th>إجراءات</th></tr></thead><tbody id="contracts-tbody"></tbody></table></div></div>
       </section>
+
 
       <!-- Visits -->
       <section id="section-visits" class="page-section">

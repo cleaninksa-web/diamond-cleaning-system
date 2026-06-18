@@ -37,6 +37,7 @@ body {
   --bg-card:        rgba(255,255,255,.06);
   --text:           #ffffff;
   --text-secondary: rgba(255,255,255,.65);
+  --text-muted:     #aaaaaa;
   --border:         rgba(255,255,255,.15);
 }
 /* الوضع الفاتح — استعادة القيم الأصلية */
@@ -46,6 +47,7 @@ body.light {
   --bg-card:        #ffffff;
   --text:           #1B2754;
   --text-secondary: #64748b;
+  --text-muted:     #888888;
   --border:         #e2e8f0;
 }
 
