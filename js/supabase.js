@@ -108,6 +108,17 @@ async function loadDataFromSupabase() {
       .order('renewal_date', { ascending: false });
     STATE.empDocs = empDocs || [];
 
+
+    // تحميل الزيارات
+    const { data: visits } = await db
+      .from('visits')
+      .select('*, customers(name)')
+      .order('visit_date', { ascending: false });
+    STATE.visits = (visits || []).map(v => ({
+      ...v,
+      customer_name: v.customers?.name || STATE.customers.find(c => c.id === v.customer_id)?.name_ar || '—',
+    }));
+
     STATE.loaded = true;
     STATE.useSupabase = true;
     console.log(`✅ تم تحميل البيانات من Supabase`);

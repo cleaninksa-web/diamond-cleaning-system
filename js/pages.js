@@ -590,39 +590,271 @@ async function saveContract() {
 }
 
 // ===== VISITS =====
+const VISIT_TECHNICIANS = ['حبيب', 'رضوان', 'ساجد', 'عالم قير'];
+
 async function load_visits() {
   if (!window.STATE?.loaded) await loadDataFromSupabase();
-  const container = document.getElementById('visits-container');
-  if (!container) return;
-  const today = new Date().toLocaleDateString('en-CA');
-  document.getElementById('filter-visit-date').value = today;
 
-  // Populate tech filter
-  const techFilter = document.getElementById('filter-visit-tech');
-  if (techFilter && techFilter.options.length <= 1) {
-    (window.STATE.technicians || []).forEach(t => techFilter.add(new Option(t.name, t.id)));
+  const today = new Date().toLocaleDateString('en-CA');
+
+  // شريط الفلاتر
+  const section = document.getElementById('section-visits');
+  if (!section) return;
+
+  // تأكد إن HTML الأساسي موجود
+  let filterBar = document.getElementById('visits-filter-bar');
+  if (!filterBar) {
+    section.innerHTML = `
+      <div id="visits-filter-bar" class="filter-bar">
+        <input type="date" class="form-input" id="filter-visit-date" style="width:auto" onchange="filterVisits()">
+        <select class="form-select" id="filter-visit-tech" onchange="filterVisits()">
+          <option value="">كل الفنيين</option>
+          ${VISIT_TECHNICIANS.map(t => `<option value="${t}">${t}</option>`).join('')}
+        </select>
+        <select class="form-select" id="filter-visit-status" onchange="filterVisits()">
+          <option value="">كل الحالات</option>
+          <option value="مجدولة">مجدولة</option>
+          <option value="تمت">تمت</option>
+          <option value="مشكلة">مشكلة</option>
+        </select>
+        <button class="btn btn-primary" onclick="openVisitModal()">➕ إضافة زيارة</button>
+      </div>
+      <div id="visits-container"></div>`;
+    filterBar = document.getElementById('visits-filter-bar');
   }
 
-  container.innerHTML = `<div class="empty-state"><div class="icon">📅</div><h3>اضغط "توليد زيارات اليوم" لإنشاء جدول الزيارات</h3><p>سيتم توليد الزيارات بناءً على أيام الزيارة المحددة لكل عميل</p></div>`;
+  // اضبط التاريخ الافتراضي
+  const dateInput = document.getElementById('filter-visit-date');
+  if (dateInput && !dateInput.value) dateInput.value = today;
+
+  filterVisits();
 }
 
-function generateDailyVisits() {
+function visitStatusBadge(status) {
+  const map = {
+    'مجدولة': 'background:rgba(59,130,246,0.15);color:#3b82f6',
+    'تمت':    'background:rgba(34,197,94,0.15);color:#16a34a',
+    'مشكلة':  'background:rgba(239,68,68,0.15);color:#dc2626',
+  };
+  const style = map[status] || 'background:rgba(100,116,139,0.15);color:#64748b';
+  return `<span class="badge" style="${style};padding:4px 12px;border-radius:20px;font-size:0.82rem;font-weight:700">${status || '—'}</span>`;
+}
+
+function filterVisits() {
+  const dateVal   = document.getElementById('filter-visit-date')?.value || '';
+  const techVal   = document.getElementById('filter-visit-tech')?.value || '';
+  const statusVal = document.getElementById('filter-visit-status')?.value || '';
+
+  let data = window.STATE?.visits || [];
+
+  if (dateVal)   data = data.filter(v => v.visit_date === dateVal);
+  if (techVal)   data = data.filter(v => v.technician === techVal);
+  if (statusVal) data = data.filter(v => v.status === statusVal);
+
+  renderVisitsTable(data);
+}
+
+function renderVisitsTable(data) {
   const container = document.getElementById('visits-container');
-  const customers = (window.STATE.customers || []).filter(c => c.status === 'يعمل');
+  if (!container) return;
 
-  let html = '';
-  (window.STATE.technicians || []).forEach(t => {
-    const myCusts = customers.filter(c => c.technician_id === t.id).slice(0, 8);
-    html += `<div class="card" style="margin-bottom:16px">
-      <div class="card-header"><h3 class="card-title">🔧 ${t.name} (${myCusts.length} زيارة)</h3></div>
-      <div class="table-wrapper"><table><thead><tr><th>#</th><th>العميل</th><th>الحي</th><th>الحالة</th></tr></thead><tbody>
-      ${myCusts.map((c, i) => `<tr><td>${i + 1}</td><td>${c.name_ar}</td><td>${c.district}</td><td><span class="badge badge-active">مجدولة</span></td></tr>`).join('')}
-      </tbody></table></div></div>`;
-  });
+  if (!window.STATE?.loaded) {
+    container.innerHTML = `<div class="empty-state"><div class="icon">⏳</div><h3>جاري التحميل...</h3></div>`;
+    return;
+  }
 
-  container.innerHTML = html;
-  showToast('تم توليد زيارات اليوم ✅', 'success');
+  if (data.length === 0) {
+    container.innerHTML = `<div class="empty-state"><div class="icon">📅</div><h3>لا توجد زيارات</h3><p>غيّر الفلاتر أو أضف زيارة جديدة</p></div>`;
+    return;
+  }
+
+  container.innerHTML = `
+    <div class="card">
+      <div class="card-header" style="display:flex;justify-content:space-between;align-items:center">
+        <h3 class="card-title">🗓️ الزيارات (${data.length})</h3>
+      </div>
+      <div class="table-wrapper">
+        <table>
+          <thead><tr>
+            <th>#</th><th>العميل</th><th>الفني</th>
+            <th>التاريخ</th><th>الحالة</th><th>الملاحظات</th><th>إجراءات</th>
+          </tr></thead>
+          <tbody>
+            ${data.map((v, i) => `
+              <tr>
+                <td>${i + 1}</td>
+                <td><strong>${v.customer_name || '—'}</strong></td>
+                <td>${v.technician || '—'}</td>
+                <td>${formatDateShort(v.visit_date)}</td>
+                <td>${visitStatusBadge(v.status)}</td>
+                <td style="max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"
+                    title="${v.notes || ''}">${v.notes || '—'}</td>
+                <td style="white-space:nowrap">
+                  <button class="btn btn-sm btn-outline" onclick="openVisitModal(${v.id})" title="تعديل">✏️</button>
+                  <button class="btn btn-sm btn-outline" onclick="deleteVisit(${v.id})" title="حذف" style="color:var(--danger)">🗑️</button>
+                </td>
+              </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>`;
 }
+
+// ===== نافذة إضافة / تعديل زيارة =====
+function openVisitModal(visitId = null) {
+  const visit = visitId ? (window.STATE?.visits || []).find(v => v.id === visitId) : null;
+  const today = new Date().toLocaleDateString('en-CA');
+
+  const custOptions = (window.STATE?.customers || [])
+    .filter(c => c.status === 'يعمل')
+    .map(c => `<option value="${c.id}" ${visit?.customer_id === c.id ? 'selected' : ''}>${c.secret_code} - ${c.name_ar}</option>`)
+    .join('');
+
+  const techOptions = VISIT_TECHNICIANS
+    .map(t => `<option value="${t}" ${visit?.technician === t ? 'selected' : ''}>${t}</option>`)
+    .join('');
+
+  const isMoshkela = visit?.status === 'مشكلة';
+
+  // احذف أي نافذة قديمة
+  document.getElementById('visit-modal-overlay')?.remove();
+
+  const modal = document.createElement('div');
+  modal.id = 'visit-modal-overlay';
+  modal.className = 'modal-overlay show';
+  modal.innerHTML = `
+    <div class="modal modal-lg">
+      <div class="modal-header">
+        <h3 class="modal-title">${visitId ? '✏️ تعديل زيارة' : '➕ إضافة زيارة'}</h3>
+        <button class="modal-close" onclick="document.getElementById('visit-modal-overlay').remove()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">العميل *</label>
+            <select class="form-select" id="v-customer">
+              <option value="">اختر العميل</option>${custOptions}
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">الفني *</label>
+            <select class="form-select" id="v-tech">
+              <option value="">اختر الفني</option>${techOptions}
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">التاريخ *</label>
+            <input type="date" class="form-input" id="v-date" value="${visit?.visit_date || today}" dir="ltr">
+          </div>
+          <div class="form-group">
+            <label class="form-label">الحالة *</label>
+            <select class="form-select" id="v-status" onchange="toggleProblemField()">
+              <option value="مجدولة" ${visit?.status === 'مجدولة' || !visit ? 'selected' : ''}>مجدولة</option>
+              <option value="تمت"    ${visit?.status === 'تمت'    ? 'selected' : ''}>تمت</option>
+              <option value="مشكلة"  ${visit?.status === 'مشكلة'  ? 'selected' : ''}>مشكلة</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">ملاحظات</label>
+          <textarea class="form-textarea" id="v-notes" rows="2">${visit?.notes || ''}</textarea>
+        </div>
+        <div class="form-group" id="v-problem-wrap" style="${isMoshkela ? '' : 'display:none'}">
+          <label class="form-label" style="color:var(--danger)">⚠️ وصف المشكلة</label>
+          <textarea class="form-textarea" id="v-problem" rows="3">${visit?.problem_description || ''}</textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" onclick="saveVisit(${visitId || 'null'})">💾 حفظ</button>
+        <button class="btn btn-outline" onclick="document.getElementById('visit-modal-overlay').remove()">إلغاء</button>
+      </div>
+    </div>`;
+
+  modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+  document.body.appendChild(modal);
+}
+
+function toggleProblemField() {
+  const status = document.getElementById('v-status')?.value;
+  const wrap   = document.getElementById('v-problem-wrap');
+  if (wrap) wrap.style.display = status === 'مشكلة' ? '' : 'none';
+}
+
+async function saveVisit(visitId) {
+  const custId  = document.getElementById('v-customer')?.value;
+  const tech    = document.getElementById('v-tech')?.value;
+  const date    = document.getElementById('v-date')?.value;
+  const status  = document.getElementById('v-status')?.value;
+  const notes   = document.getElementById('v-notes')?.value?.trim() || null;
+  const problem = document.getElementById('v-problem')?.value?.trim() || null;
+
+  if (!custId)  { showToast('يرجى اختيار العميل', 'error'); return; }
+  if (!tech)    { showToast('يرجى اختيار الفني', 'error'); return; }
+  if (!date)    { showToast('يرجى تحديد التاريخ', 'error'); return; }
+
+  const btn = document.querySelector('#visit-modal-overlay .btn-primary');
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ جاري الحفظ...'; }
+
+  const payload = {
+    customer_id:         parseInt(custId),
+    technician:          tech,
+    visit_date:          date,
+    status:              status,
+    notes:               notes,
+    problem_description: status === 'مشكلة' ? problem : null,
+  };
+
+  try {
+    if (window.STATE?.useSupabase) {
+      if (visitId) {
+        // تعديل
+        const { error } = await window.db.from('visits').update(payload).eq('id', visitId);
+        if (error) throw error;
+        const idx = (STATE.visits || []).findIndex(v => v.id === visitId);
+        if (idx >= 0) {
+          const custName = (STATE.customers || []).find(c => c.id === parseInt(custId))?.name_ar || '—';
+          STATE.visits[idx] = { ...STATE.visits[idx], ...payload, customer_name: custName };
+        }
+        showToast('تم تحديث الزيارة ✅', 'success');
+      } else {
+        // إضافة جديدة
+        const { data, error } = await window.db.from('visits').insert(payload).select().single();
+        if (error) throw error;
+        const custName = (STATE.customers || []).find(c => c.id === parseInt(custId))?.name_ar || '—';
+        STATE.visits = [{ ...data, customer_name: custName }, ...(STATE.visits || [])];
+        showToast('تمت إضافة الزيارة ✅', 'success');
+      }
+    } else {
+      showToast('وضع تجريبي — لم يتم الحفظ', 'warning');
+    }
+
+    document.getElementById('visit-modal-overlay')?.remove();
+    filterVisits();
+  } catch (err) {
+    showToast('خطأ: ' + err.message, 'error');
+    console.error(err);
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = '💾 حفظ'; }
+  }
+}
+
+async function deleteVisit(visitId) {
+  if (!confirm('هل تريد حذف هذه الزيارة؟')) return;
+  try {
+    if (window.STATE?.useSupabase) {
+      const { error } = await window.db.from('visits').delete().eq('id', visitId);
+      if (error) throw error;
+    }
+    STATE.visits = (STATE.visits || []).filter(v => v.id !== visitId);
+    showToast('تم حذف الزيارة 🗑️', 'success');
+    filterVisits();
+  } catch (err) {
+    showToast('خطأ: ' + err.message, 'error');
+  }
+}
+
 
 // ===== DOCUMENTS =====
 function load_documents() {}
